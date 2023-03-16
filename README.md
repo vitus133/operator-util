@@ -19,6 +19,8 @@ PACKAGE=${PACKAGE:-sriov-network-operator}
 ```
 ##### Example:
 ```bash
+$ ./scripts/dl-bundle.sh
+
 Catalog file name: /tmp/tmp.JalEd9v9KX
 Type "catalog_fn=/tmp/tmp.JalEd9v9KX ./scripts/dl-bundle.sh" to make it faster next time
 Rendering the catalog, it will take a minute
@@ -61,7 +63,8 @@ Flags:
 ##### Notes
 - Some operators don't specify a recommended namespace (for example, ptp-operator). In this case a namespace `<package>-system` will be generated. The `--override-namespace` flag helps to set a custom namespace.
 - Wrapping in policies is not supported in this version
-- Come CSV features are not supported. For example, if [WebhookDefinition ClusterServiceVersion Object](https://olm.operatorframework.io/docs/advanced-tasks/adding-admission-and-conversion-webhooks/#the-webhookdefinition-clusterserviceversion-object) is present, a warning is given, but the deployment is built. The mechanism for creating and rotating webhook certificates is FFS. In OLM deployments, OLM is responsible for creating and rotating webhook certificates. If `ApiServiceDefinitions` object is present in CSV, the conversion is aborted (the consequences are FFS) 
+- Some CSV features are not supported. For example, if [WebhookDefinition ClusterServiceVersion Object](https://olm.operatorframework.io/docs/advanced-tasks/adding-admission-and-conversion-webhooks/#the-webhookdefinition-clusterserviceversion-object) is present, a warning is given, but the deployment is built. The mechanism for creating and rotating webhook certificates is FFS. In OLM deployments, OLM is responsible for creating and rotating webhook certificates.
+- If `ApiServiceDefinitions` object is present in CSV, the conversion is aborted (the consequences are FFS) 
 ##### Example
 ```bash
 $ go run main.go convert --input /tmp/tmp.5bLxUBpJd0
