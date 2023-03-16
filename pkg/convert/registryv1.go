@@ -9,6 +9,7 @@ import (
 	"hash/fnv"
 	"io"
 	"io/fs"
+	"log"
 	"path/filepath"
 	"strings"
 
@@ -41,15 +42,15 @@ type Plain struct {
 	Objects []client.Object
 }
 
-func RegistryV1ToPlain(rv1 fs.FS, ns string) (bytes.Buffer, error) {
-	reg := RegistryV1{}
+func RegistryV1ToPlain(rv1 fs.FS, reg *RegistryV1, ns string) (*Plain, error) {
+
 	fileData, err := fs.ReadFile(rv1, filepath.Join("metadata", "annotations.yaml"))
 	if err != nil {
-		return bytes.Buffer{}, err
+		return nil, err
 	}
 	annotationsFile := registry.AnnotationsFile{}
 	if err := yaml.Unmarshal(fileData, &annotationsFile); err != nil {
-		return bytes.Buffer{}, err
+		return nil, err
 	}
 	reg.PackageName = annotationsFile.Annotations.PackageName
 
@@ -58,15 +59,15 @@ func RegistryV1ToPlain(rv1 fs.FS, ns string) (bytes.Buffer, error) {
 
 	entries, err := fs.ReadDir(rv1, manifestsDir)
 	if err != nil {
-		return bytes.Buffer{}, err
+		return nil, err
 	}
 	for _, e := range entries {
 		if e.IsDir() {
-			return bytes.Buffer{}, fmt.Errorf("subdirectories are not allowed within the %q directory of the bundle image filesystem: found %q", manifestsDir, filepath.Join(manifestsDir, e.Name()))
+			return nil, fmt.Errorf("subdirectories are not allowed within the %q directory of the bundle image filesystem: found %q", manifestsDir, filepath.Join(manifestsDir, e.Name()))
 		}
 		fileData, err := fs.ReadFile(rv1, filepath.Join(manifestsDir, e.Name()))
 		if err != nil {
-			return bytes.Buffer{}, err
+			return nil, err
 		}
 
 		dec := apimachyaml.NewYAMLOrJSONDecoder(bytes.NewReader(fileData), 1024)
@@ -77,7 +78,7 @@ func RegistryV1ToPlain(rv1 fs.FS, ns string) (bytes.Buffer, error) {
 				break
 			}
 			if err != nil {
-				return bytes.Buffer{}, fmt.Errorf("read %q: %v", e.Name(), err)
+				return nil, fmt.Errorf("read %q: %v", e.Name(), err)
 			}
 			objects = append(objects, &obj)
 		}
@@ -89,13 +90,13 @@ func RegistryV1ToPlain(rv1 fs.FS, ns string) (bytes.Buffer, error) {
 		case "ClusterServiceVersion":
 			csv := v1alpha1.ClusterServiceVersion{}
 			if err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, &csv); err != nil {
-				return bytes.Buffer{}, err
+				return nil, err
 			}
 			reg.CSV = csv
 		case "CustomResourceDefinition":
 			crd := apiextensionsv1.CustomResourceDefinition{}
 			if err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, &crd); err != nil {
-				return bytes.Buffer{}, err
+				return nil, err
 			}
 			reg.CRDs = append(reg.CRDs, crd)
 		default:
@@ -103,22 +104,11 @@ func RegistryV1ToPlain(rv1 fs.FS, ns string) (bytes.Buffer, error) {
 		}
 	}
 
-	plain, err := Convert(reg, ns, nil)
+	plain, err := Convert(*reg, ns, nil)
 	if err != nil {
-		return bytes.Buffer{}, err
+		return nil, err
 	}
-
-	var manifest bytes.Buffer
-	for _, obj := range plain.Objects {
-		yamlData, err := yaml.Marshal(obj)
-		if err != nil {
-			return bytes.Buffer{}, err
-		}
-		if _, err := fmt.Fprintf(&manifest, "---\n%s\n", string(yamlData)); err != nil {
-			return bytes.Buffer{}, err
-		}
-	}
-	return manifest, nil
+	return plain, nil
 }
 
 func validateTargetNamespaces(supportedInstallModes sets.Set[string], installNamespace string, targetNamespaces []string) error {
@@ -160,12 +150,12 @@ func Convert(in RegistryV1, installNamespace string, targetNamespaces []string) 
 	if installNamespace == "" {
 		installNamespace = fmt.Sprintf("%s-system", in.PackageName)
 	}
-	fmt.Printf("Install namespace is %s\n", installNamespace)
+	log.Printf("Install namespace is %s\n", installNamespace)
 	supportedInstallModes := sets.New[string]()
 	for _, im := range in.CSV.Spec.InstallModes {
 		if im.Supported {
 			supportedInstallModes.Insert(string(im.Type))
-			fmt.Printf("Supported Install mode: %s\n", im.Type)
+			log.Printf("Supported Install mode: %s\n", im.Type)
 		}
 	}
 	// if !supportedInstallModes.Has(string(v1alpha1.InstallModeTypeAllNamespaces)) {
@@ -189,7 +179,7 @@ func Convert(in RegistryV1, installNamespace string, targetNamespaces []string) 
 
 	if len(in.CSV.Spec.WebhookDefinitions) > 0 {
 		//return nil, fmt.Errorf("webhookDefinitions are not supported")
-		fmt.Print("Warning: webhookDefinitions are not supported")
+		log.Println("Warning: webhookDefinitions are not supported")
 	}
 
 	deployments := []appsv1.Deployment{}
@@ -256,13 +246,13 @@ func Convert(in RegistryV1, installNamespace string, targetNamespaces []string) 
 
 	for _, permission := range permissions {
 		saName := saNameOrDefault(permission.ServiceAccountName)
-		name := generateName(fmt.Sprintf("%s-%s", in.CSV.Name, saName), []interface{}{in.CSV.Name, permission})
+		name := GenerateName(fmt.Sprintf("%s-%s", in.CSV.Name, saName), []interface{}{in.CSV.Name, permission})
 		roles = append(roles, newRole(installNamespace, name, permission.Rules))
 		roleBindings = append(roleBindings, newRoleBinding(installNamespace, name, name, installNamespace, saName))
 	}
 	for _, permission := range clusterPermissions {
 		saName := saNameOrDefault(permission.ServiceAccountName)
-		name := generateName(fmt.Sprintf("%s-%s", in.CSV.Name, saName), []interface{}{in.CSV.GetName(), permission})
+		name := GenerateName(fmt.Sprintf("%s-%s", in.CSV.Name, saName), []interface{}{in.CSV.GetName(), permission})
 		clusterRoles = append(clusterRoles, newClusterRole(name, permission.Rules))
 		clusterRoleBindings = append(clusterRoleBindings, newClusterRoleBinding(name, name, installNamespace, saName))
 	}
@@ -311,7 +301,7 @@ func Convert(in RegistryV1, installNamespace string, targetNamespaces []string) 
 
 const maxNameLength = 63
 
-func generateName(base string, o interface{}) string {
+func GenerateName(base string, o interface{}) string {
 	hasher := fnv.New32a()
 
 	util.DeepHashObject(hasher, o)

@@ -5,15 +5,20 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
+	yaml "sigs.k8s.io/yaml"
 
 	convert "github.com/vitus133/operator-util/pkg/convert"
 )
 
 var wrap bool
 var inputPath string
+var outputPath string
 var overrideNamespace string
 
 // convertCmd represents the convert command
@@ -33,16 +38,35 @@ func init() {
 	rootCmd.AddCommand(convertCmd)
 	convertCmd.PersistentFlags().BoolVar(&wrap, "wrap", false, "Wrap in ACM policy (default is false)")
 	convertCmd.PersistentFlags().StringVar(&inputPath, "input", "", "Path to the bundle image file system")
+	convertCmd.PersistentFlags().StringVar(&outputPath, "output", "", "Path to the directory for output files (if omitted, a random directory will be created at cwd)")
 	convertCmd.PersistentFlags().StringVar(&overrideNamespace, "override-namespace", "", "Override default target namespace")
 }
 
 func convertBundle(args []string) {
 	fsys := os.DirFS(inputPath)
-	objects, err := convert.RegistryV1ToPlain(fsys, overrideNamespace)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	reg := convert.RegistryV1{}
+	plain, err := convert.RegistryV1ToPlain(fsys, &reg, overrideNamespace)
+	if outputPath == "" {
+		cwd, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		outputPath = filepath.Join(cwd, reg.CSV.Name)
+		os.Mkdir(outputPath, 0755)
 	}
-
-	fmt.Print(objects.String())
+	log.Println(reg.CSV.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, obj := range plain.Objects {
+		yamlData, err := yaml.Marshal(obj)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fn := fmt.Sprintf("%s-%s.yaml", strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind), obj.GetName())
+		err = os.WriteFile(filepath.Join(outputPath, fn), yamlData, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
