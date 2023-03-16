@@ -1,15 +1,15 @@
 # operator-util
 Tools for extracting and converting OLM schema
-## Prerequsites
+## Prerequisites
 - opm
 - podman
 - jq
 - go 1.19
 ## Use cases
 ### Deploy an operator without OLM
-This operation is consist of several stages
+This operation has three stages: index rendering, bundle pulling and schema conversion. The first two are combined in one script.
 #### 1. Download the catalog and extract the bundle
-Use [dl-bundle.sh](scripts/dl-bundle.sh) to download the operator catalog and extract the reqiored bundle.
+Use [dl-bundle.sh](scripts/dl-bundle.sh) to download the operator catalog and extract the required bundle.
 ##### Environment:
 Three environment variables are used to download the catalog and extract the bundle:
 ```bash
@@ -32,8 +32,8 @@ registry.redhat.io/openshift4/ose-sriov-network-operator-bundle@sha256:1f5c3db3e
 pulling the bundle, it will take a minute
 /tmp/tmp.5bLxUBpJd0
 ```
-- `catalog_fn=/tmp/tmp.JalEd9v9KX` is an additional environment varible - file name where rendered operator catalog is stored. It cac be specified in the consequtive operations for other packages and bundles from the same catalog.
-- `/tmp/tmp.5bLxUBpJd0` is a directore where the bundle selected by user is downloaded and extracted. It must be specified as a parameter to the schema conversion tool
+- `catalog_fn=/tmp/tmp.JalEd9v9KX` is an additional environment variable - file name where rendered operator catalog is stored. It can be specified in the following operations for other packages and bundles from the same catalog.
+- `/tmp/tmp.5bLxUBpJd0` is a directory where the bundle selected by user is downloaded and extracted. It must be specified as a parameter to the schema conversion tool
 
 ##### Notes
 1. The opm and podman require pull secret. Copy it to `~/.docker/config.json`
