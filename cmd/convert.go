@@ -38,7 +38,7 @@ func init() {
 	rootCmd.AddCommand(convertCmd)
 	convertCmd.PersistentFlags().BoolVar(&wrap, "wrap", false, "Wrap in ACM policy (default is false)")
 	convertCmd.PersistentFlags().StringVar(&inputPath, "input", "", "Path to the bundle image file system")
-	convertCmd.PersistentFlags().StringVar(&outputPath, "output", "", "Path to the directory for output files (if omitted, a random directory will be created at cwd)")
+	convertCmd.PersistentFlags().StringVar(&outputPath, "output", "", "Path to the directory for output files (if omitted, a directory will be created at cwd)")
 	convertCmd.PersistentFlags().StringVar(&overrideNamespace, "override-namespace", "", "Override default target namespace")
 }
 
