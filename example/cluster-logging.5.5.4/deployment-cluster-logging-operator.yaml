@@ -1,0 +1,165 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "logging.openshift.io/v1",
+          "kind": "ClusterLogForwarder",
+          "metadata": {
+            "name": "instance",
+            "namespace": "openshift-logging"
+          },
+          "spec": {
+            "outputs": [
+              {
+                "name": "remote-elasticsearch",
+                "secret": {
+                  "name": "elasticsearch"
+                },
+                "type": "elasticsearch",
+                "url": "remote.example.org:9200"
+              }
+            ],
+            "pipelines": [
+              {
+                "inputRefs": [
+                  "application",
+                  "audit",
+                  "infrastructure"
+                ],
+                "name": "enable-default-log-store",
+                "outputRefs": [
+                  "default"
+                ]
+              },
+              {
+                "inputRefs": [
+                  "application"
+                ],
+                "name": "forward-to-remote",
+                "outputRefs": [
+                  "remote-elasticsearch"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "apiVersion": "logging.openshift.io/v1",
+          "kind": "ClusterLogging",
+          "metadata": {
+            "name": "instance",
+            "namespace": "openshift-logging"
+          },
+          "spec": {
+            "collection": {
+              "type": "fluentd"
+            },
+            "logStore": {
+              "elasticsearch": {
+                "nodeCount": 3,
+                "redundancyPolicy": "SingleRedundancy",
+                "resources": {
+                  "requests": {
+                    "memory": "2Gi"
+                  }
+                },
+                "storage": {
+                  "size": "200G",
+                  "storageClassName": "gp2"
+                }
+              },
+              "retentionPolicy": {
+                "application": {
+                  "maxAge": "7d"
+                }
+              },
+              "type": "elasticsearch"
+            },
+            "managementState": "Managed",
+            "visualization": {
+              "kibana": {
+                "replicas": 1
+              },
+              "type": "kibana"
+            }
+          }
+        }
+      ]
+    capabilities: Seamless Upgrades
+    categories: OpenShift Optional, Logging & Tracing
+    certified: "false"
+    console.openshift.io/plugins: '["logging-view-plugin"]'
+    containerImage: registry.redhat.io/openshift-logging/cluster-logging-rhel8-operator@sha256:c2de02159e827023b92188e8a29bc82e8dff55f51f2e5e50c159a55fcb981de2
+    createdAt: "2018-08-01T08:00:00Z"
+    description: The Red Hat OpenShift Logging Operator for OCP provides a means for
+      configuring and managing your aggregated logging stack.
+    kubectl.kubernetes.io/default-container: cluster-logging-operator
+    olm.skipRange: '>=4.6.0-0 <5.5.4'
+    olm.targetNamespaces: openshift-logging
+    operatorframework.io/cluster-monitoring: "true"
+    operatorframework.io/suggested-namespace: openshift-logging
+    operators.openshift.io/infrastructure-features: '["disconnected","proxy-aware"]'
+    operators.openshift.io/valid-subscription: '["OpenShift Kubernetes Engine", "OpenShift
+      Container Platform", "OpenShift Platform Plus"]'
+    operators.operatorframework.io/builder: operator-sdk-unknown
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
+    support: AOS Logging (team-logging@redhat.com)
+    target.workload.openshift.io/management: '{"effect": "PreferredDuringScheduling"}'
+  creationTimestamp: null
+  name: cluster-logging-operator
+  namespace: openshift-logging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: cluster-logging-operator
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: cluster-logging-operator
+        target.workload.openshift.io/management: '{"effect": "PreferredDuringScheduling"}'
+      creationTimestamp: null
+      labels:
+        name: cluster-logging-operator
+    spec:
+      containers:
+      - command:
+        - cluster-logging-operator
+        env:
+        - name: WATCH_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['olm.targetNamespaces']
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: OPERATOR_NAME
+          value: cluster-logging-operator
+        - name: RELATED_IMAGE_VECTOR
+          value: registry.redhat.io/openshift-logging/vector-rhel8@sha256:0001cef8ce03715daa1c0785839d80edf9d9f306dbc4cd58499ccdb84b370b7a
+        - name: RELATED_IMAGE_FLUENTD
+          value: registry.redhat.io/openshift-logging/fluentd-rhel8@sha256:842077788b4434800127d63b4cd5d8cfaa1cfd3ca1dfd8439de30c6e8ebda884
+        - name: RELATED_IMAGE_LOG_FILE_METRIC_EXPORTER
+          value: registry.redhat.io/openshift-logging/log-file-metric-exporter-rhel8@sha256:4e850fced9cc85ff23cb60ec8628f581b32f36313714a205c67c9a088a1b4f74
+        - name: RELATED_IMAGE_LOGGING_CONSOLE_PLUGIN
+          value: registry.redhat.io/openshift-logging/logging-view-plugin-rhel8@sha256:b95bca9112fceed32464de1a7e19a245e511ce4858088213261c559149d4d3e2
+        image: registry.redhat.io/openshift-logging/cluster-logging-rhel8-operator@sha256:c2de02159e827023b92188e8a29bc82e8dff55f51f2e5e50c159a55fcb981de2
+        imagePullPolicy: IfNotPresent
+        name: cluster-logging-operator
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      nodeSelector:
+        kubernetes.io/os: linux
+      securityContext:
+        runAsNonRoot: true
+      serviceAccountName: cluster-logging-operator
+status: {}

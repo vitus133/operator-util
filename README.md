@@ -5,6 +5,7 @@ Tools for extracting and converting OLM schema
 - podman
 - jq
 - go 1.19
+- [ACM policy generator plugin](https://github.com/stolostron/policy-generator-plugin) for wrapping in policies
 ## Use cases
 ### Deploy an operator without OLM
 This operation has three stages: index rendering, bundle pulling and schema conversion. The first two are combined in one script.
@@ -95,7 +96,16 @@ sriov-network-operator.v4.12.0-202302280915
 ├── serviceaccount-sriov-network-config-daemon.yaml
 └── serviceaccount-sriov-network-operator.yaml
 ```
+
+## Debug
+What have I done manually?
+1. Create customization files for each operator
+1. Add management annotations to all the namespaces
+### sriov-network-operator
+1. Add namespace to the supported nics configmap
+2. Remove status field from CRD - otherwise policies are not getting compliant
 ## Plans
+1. Add management annotation to the namespace
 1. implement policy wrapper
 2. research how to handle ApiServiceDefinitions and WebhookDefinition
 3. use makefile
