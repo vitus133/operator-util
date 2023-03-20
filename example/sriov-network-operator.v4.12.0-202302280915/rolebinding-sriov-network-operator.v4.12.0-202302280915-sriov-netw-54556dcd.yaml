@@ -1,14 +1,14 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  creationTimestamp: null
-  name: sriov-network-operator.v4.12.0-202302280915-sriov-netw-54556dcd
-  namespace: openshift-sriov-network-operator
+    creationTimestamp: null
+    name: sriov-network-operator.v4.12.0-202302280915-sriov-netw-54556dcd
+    namespace: openshift-sriov-network-operator
 roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: sriov-network-operator.v4.12.0-202302280915-sriov-netw-54556dcd
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: sriov-network-operator.v4.12.0-202302280915-sriov-netw-54556dcd
 subjects:
-- kind: ServiceAccount
-  name: sriov-network-operator
-  namespace: openshift-sriov-network-operator
+    - kind: ServiceAccount
+      name: sriov-network-operator
+      namespace: openshift-sriov-network-operator

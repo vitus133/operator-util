@@ -11,9 +11,9 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	yaml "sigs.k8s.io/yaml"
-
 	convert "github.com/vitus133/operator-util/pkg/convert"
+	yamlv3 "gopkg.in/yaml.v3"
+	yaml "sigs.k8s.io/yaml"
 )
 
 var wrap bool
@@ -63,10 +63,22 @@ func convertBundle(args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		temp := make(map[interface{}]interface{})
+		err = yamlv3.Unmarshal(yamlData, &temp)
+		if err != nil {
+			log.Fatal(err)
+		}
+		delete(temp, "status")
+		yamlData, err = yamlv3.Marshal(temp)
+
+		if err != nil {
+			log.Fatal(err)
+		}
 		fn := fmt.Sprintf("%s-%s.yaml", strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind), obj.GetName())
 		err = os.WriteFile(filepath.Join(outputPath, fn), yamlData, 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
+
 }

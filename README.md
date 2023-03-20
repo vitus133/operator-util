@@ -96,18 +96,29 @@ sriov-network-operator.v4.12.0-202302280915
 ├── serviceaccount-sriov-network-config-daemon.yaml
 └── serviceaccount-sriov-network-operator.yaml
 ```
+#### 3. Apply the bundle with policies
+ACM policy generator is used for wrapping the manifests in policies and creating placements.
+It is all defined in [example/policy-generator-config.yaml](example/policy-generator-config.yaml). It defines the installation namespace and other conversion features. It also includes the list of the extracted operator manifests to wrap.
+Installing the ACM policy generator is covered in [https://github.com/stolostron/policy-generator-plugin](https://github.com/stolostron/policy-generator-plugin)
 
+##### Example
+Navigate to the [example](example) directory
+Run command:
+```bash
+kustomize build --enable-alpha-plugins . > wrapped.yaml
+```
+Apply the wrapped manifests to your hub.
 ## Debug
 What have I done manually?
 1. Create customization files for each operator
-1. Add management annotations to all the namespaces
+1. Add management annotations to all the namespaces - done
 ### sriov-network-operator
-1. Add namespace to the supported nics configmap
-2. Remove status field from CRD - otherwise policies are not getting compliant
+1. Add namespace to the supported nics configmap - done
+2. Remove status field from CRD - otherwise policies are not getting compliant - done
 ## Plans
-1. Add management annotation to the namespace
-1. implement policy wrapper
-2. research how to handle ApiServiceDefinitions and WebhookDefinition
+1. Add management annotation to the namespace - done
+1. implement policy wrapper - done
+2. research how to handle ApiServiceDefinitions and WebhookDefinition - WIP
 3. use makefile
 4. use config file so user won't need to copy temporary file names form one command to another
 5. do pulling and rendering in go, so it can be reused in TALM

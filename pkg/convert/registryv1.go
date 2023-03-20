@@ -258,6 +258,10 @@ func Convert(in RegistryV1, installNamespace string, targetNamespaces []string) 
 		TypeMeta:   metav1.TypeMeta{Kind: "Namespace", APIVersion: "v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: installNamespace},
 	}
+	if strings.HasPrefix(installNamespace, "openshift-") {
+		ns.ObjectMeta.Annotations = make(map[string]string)
+		ns.ObjectMeta.Annotations["workload.openshift.io/allowed"] = "management"
+	}
 	objs := []client.Object{ns}
 	for _, obj := range serviceAccounts {
 		obj := obj
@@ -287,6 +291,7 @@ func Convert(in RegistryV1, installNamespace string, targetNamespaces []string) 
 	}
 	for _, obj := range in.Others {
 		obj := obj
+		obj.SetNamespace(installNamespace)
 		objs = append(objs, &obj)
 	}
 	for _, obj := range deployments {
