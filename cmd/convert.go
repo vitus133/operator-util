@@ -63,6 +63,9 @@ func convertBundle(args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		// This is a workaround for ACM hub not being able
+		// to apply a musthave policy with a manifest that
+		// contains a status field.
 		temp := make(map[interface{}]interface{})
 		err = yamlv3.Unmarshal(yamlData, &temp)
 		if err != nil {
@@ -70,10 +73,10 @@ func convertBundle(args []string) {
 		}
 		delete(temp, "status")
 		yamlData, err = yamlv3.Marshal(temp)
-
 		if err != nil {
 			log.Fatal(err)
 		}
+		// End workaround
 		fn := fmt.Sprintf("%s-%s.yaml", strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind), obj.GetName())
 		err = os.WriteFile(filepath.Join(outputPath, fn), yamlData, 0644)
 		if err != nil {
