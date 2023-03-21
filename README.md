@@ -5,7 +5,8 @@ Tools for extracting and converting OLM schema
 - podman
 - jq
 - go 1.19
-- [ACM policy generator plugin](https://github.com/stolostron/policy-generator-plugin) for wrapping in policies
+- kustomize (for wrapping in policies)
+- [ACM policy generator plugin](https://github.com/stolostron/policy-generator-plugin) (for wrapping in policies)
 ## Use cases
 ### Deploy an operator without OLM
 This operation has three stages: index rendering, bundle pulling and schema conversion. The first two are combined in one script.
