@@ -1,13 +1,14 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  labels:
-    control-plane: cluster-logging-operator
-  name: cluster-logging-operator-metrics-monitor
+    labels:
+        control-plane: cluster-logging-operator
+    name: cluster-logging-operator-metrics-monitor
+    namespace: openshift-logging
 spec:
-  endpoints:
-  - port: http-metrics
-  namespaceSelector: {}
-  selector:
-    matchLabels:
-      name: cluster-logging-operator
+    endpoints:
+        - port: http-metrics
+    namespaceSelector: {}
+    selector:
+        matchLabels:
+            name: cluster-logging-operator

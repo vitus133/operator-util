@@ -1,12 +1,13 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  creationTimestamp: null
-  name: log-collector-privileged-binding
+    creationTimestamp: null
+    name: log-collector-privileged-binding
+    namespace: openshift-logging
 roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: log-collector-privileged
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: log-collector-privileged
 subjects:
-- kind: ServiceAccount
-  name: logcollector
+    - kind: ServiceAccount
+      name: logcollector

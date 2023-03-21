@@ -1,23 +1,19 @@
 resources:
-- clusterrolebinding-cluster-logging.5.5.4-cluster-logging-operator-564b457fbf.yaml
-- clusterrolebinding-cluster-logging-metadata-reader.yaml
-- clusterrole-cluster-logging.5.5.4-cluster-logging-operator-564b457fbf.yaml
-- clusterrole-metadata-reader.yaml
-- customresourcedefinition-clusterlogforwarders.logging.openshift.io.yaml
-- customresourcedefinition-clusterloggings.logging.openshift.io.yaml
-- deployment-cluster-logging-operator.yaml
-- namespace-openshift-logging.yaml
-- priorityclass-cluster-logging.yaml
-- rolebinding-cluster-logging.5.5.4-cluster-logging-operator-58cd59778b.yaml
-- rolebinding-log-collector-privileged-binding.yaml
-- rolebinding-prometheus.yaml
-- role-cluster-logging.5.5.4-cluster-logging-operator-58cd59778b.yaml
-- role-log-collector-privileged.yaml
-- role-prometheus.yaml
-- serviceaccount-cluster-logging-operator.yaml
-- service-cluster-logging-operator-metrics.yaml
-- servicemonitor-cluster-logging-operator-metrics-monitor.yaml
- 
- 
- 
- 
+    - namespace-openshift-logging.yaml
+    - serviceaccount-cluster-logging-operator.yaml
+    - role-cluster-logging.5.5.4-cluster-logging-operator-58cd59778b.yaml
+    - rolebinding-cluster-logging.5.5.4-cluster-logging-operator-58cd59778b.yaml
+    - clusterrole-cluster-logging.5.5.4-cluster-logging-operator-564b457fbf.yaml
+    - clusterrolebinding-cluster-logging.5.5.4-cluster-logging-operator-564b457fbf.yaml
+    - customresourcedefinition-clusterlogforwarders.logging.openshift.io.yaml
+    - customresourcedefinition-clusterloggings.logging.openshift.io.yaml
+    - clusterrolebinding-cluster-logging-metadata-reader.yaml
+    - servicemonitor-cluster-logging-operator-metrics-monitor.yaml
+    - service-cluster-logging-operator-metrics.yaml
+    - priorityclass-cluster-logging.yaml
+    - rolebinding-log-collector-privileged-binding.yaml
+    - role-log-collector-privileged.yaml
+    - clusterrole-metadata-reader.yaml
+    - role-prometheus.yaml
+    - rolebinding-prometheus.yaml
+    - deployment-cluster-logging-operator.yaml

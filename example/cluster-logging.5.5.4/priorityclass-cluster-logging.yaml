@@ -3,6 +3,7 @@ description: This priority class is for the Cluster-Logging Collector
 globalDefault: false
 kind: PriorityClass
 metadata:
-  name: cluster-logging
+    name: cluster-logging
+    namespace: openshift-logging
 preemptionPolicy: PreemptLowerPriority
 value: 1000000
