@@ -110,8 +110,8 @@ kustomize build --enable-alpha-plugins . > wrapped.yaml
 Apply the wrapped manifests to your hub.
 ## Debug
 What have I done manually?
-1. Create customization files for each operator
-1. Add management annotations to all the namespaces - done
+1. Create customization files for each operator - fixed
+1. Add management annotations to all the namespaces - fixed
 ### sriov-network-operator
 1. Add namespace to the supported nics configmap - done
 2. Remove status field from CRD - otherwise policies are not getting compliant - done

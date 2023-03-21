@@ -1279,6 +1279,1326 @@ spec:
               creationTimestamp: null
               name: sriov-network-operator
               namespace: openshift-sriov-network-operator
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              annotations:
+                workload.openshift.io/allowed: management
+              creationTimestamp: null
+              name: openshift-local-storage
+            spec: {}
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: v1
+            kind: ServiceAccount
+            metadata:
+              creationTimestamp: null
+              name: local-storage-operator
+              namespace: openshift-local-storage
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: v1
+            kind: ServiceAccount
+            metadata:
+              creationTimestamp: null
+              name: local-storage-admin
+              namespace: openshift-local-storage
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: Role
+            metadata:
+              creationTimestamp: null
+              name: local-storage-operator.v4.12.0-202302280915-local-st-6cd69fc47d
+              namespace: openshift-local-storage
+            rules:
+            - apiGroups:
+              - ""
+              - coordination.k8s.io
+              resources:
+              - configmaps
+              - leases
+              verbs:
+              - get
+              - list
+              - watch
+              - create
+              - update
+              - patch
+              - delete
+            - apiGroups:
+              - ""
+              resources:
+              - events
+              verbs:
+              - create
+              - patch
+            - apiGroups:
+              - local.storage.openshift.io
+              resources:
+              - '*'
+              verbs:
+              - '*'
+            - apiGroups:
+              - ""
+              resources:
+              - pods
+              - services
+              - services/finalizers
+              - endpoints
+              - persistentvolumeclaims
+              - events
+              - configmaps
+              - secrets
+              verbs:
+              - '*'
+            - apiGroups:
+              - apps
+              resources:
+              - deployments
+              - daemonsets
+              - replicasets
+              - statefulsets
+              verbs:
+              - '*'
+            - apiGroups:
+              - events.k8s.io
+              resources:
+              - events
+              verbs:
+              - '*'
+            - apiGroups:
+              - monitoring.coreos.com
+              resources:
+              - servicemonitors
+              verbs:
+              - get
+              - list
+              - watch
+              - create
+              - update
+              - patch
+              - delete
+            - apiGroups:
+              - apps
+              resourceNames:
+              - local-storage-operator
+              resources:
+              - deployments/finalizers
+              verbs:
+              - update
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: Role
+            metadata:
+              creationTimestamp: null
+              name: local-storage-operator.v4.12.0-202302280915-local-st-7c99899f4f
+              namespace: openshift-local-storage
+            rules:
+            - apiGroups:
+              - local.storage.openshift.io
+              resources:
+              - '*'
+              verbs:
+              - get
+              - list
+              - watch
+              - create
+              - update
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: RoleBinding
+            metadata:
+              creationTimestamp: null
+              name: local-storage-operator.v4.12.0-202302280915-local-st-6cd69fc47d
+              namespace: openshift-local-storage
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: Role
+              name: local-storage-operator.v4.12.0-202302280915-local-st-6cd69fc47d
+            subjects:
+            - kind: ServiceAccount
+              name: local-storage-operator
+              namespace: openshift-local-storage
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: RoleBinding
+            metadata:
+              creationTimestamp: null
+              name: local-storage-operator.v4.12.0-202302280915-local-st-7c99899f4f
+              namespace: openshift-local-storage
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: Role
+              name: local-storage-operator.v4.12.0-202302280915-local-st-7c99899f4f
+            subjects:
+            - kind: ServiceAccount
+              name: local-storage-admin
+              namespace: openshift-local-storage
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRole
+            metadata:
+              creationTimestamp: null
+              name: local-storage-operator.v4.12.0-202302280915-local-st-7cf578cfbf
+            rules:
+            - apiGroups:
+              - storage.k8s.io
+              resources:
+              - storageclasses
+              verbs:
+              - '*'
+            - apiGroups:
+              - ""
+              resources:
+              - persistentvolumeclaims
+              - events
+              verbs:
+              - '*'
+            - apiGroups:
+              - events.k8s.io
+              resources:
+              - events
+              verbs:
+              - '*'
+            - apiGroups:
+              - ""
+              resources:
+              - nodes
+              verbs:
+              - get
+              - list
+              - watch
+            - apiGroups:
+              - ""
+              resources:
+              - persistentvolumes
+              verbs:
+              - get
+              - list
+              - watch
+              - create
+              - delete
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRole
+            metadata:
+              creationTimestamp: null
+              name: local-storage-operator.v4.12.0-202302280915-local-st-686958dd78
+            rules:
+            - apiGroups:
+              - security.openshift.io
+              resourceNames:
+              - privileged
+              resources:
+              - securitycontextconstraints
+              verbs:
+              - use
+            - apiGroups:
+              - ""
+              resources:
+              - nodes
+              verbs:
+              - list
+              - get
+              - watch
+            - apiGroups:
+              - ""
+              - storage.k8s.io
+              resources:
+              - configmaps
+              - storageclasses
+              - persistentvolumeclaims
+              - persistentvolumes
+              verbs:
+              - '*'
+            - apiGroups:
+              - ""
+              - events.k8s.io
+              resources:
+              - events
+              verbs:
+              - get
+              - list
+              - watch
+              - create
+              - patch
+              - update
+            - apiGroups:
+              - authentication.k8s.io
+              resources:
+              - tokenreviews
+              verbs:
+              - create
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRoleBinding
+            metadata:
+              creationTimestamp: null
+              name: local-storage-operator.v4.12.0-202302280915-local-st-7cf578cfbf
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: ClusterRole
+              name: local-storage-operator.v4.12.0-202302280915-local-st-7cf578cfbf
+            subjects:
+            - kind: ServiceAccount
+              name: local-storage-operator
+              namespace: openshift-local-storage
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRoleBinding
+            metadata:
+              creationTimestamp: null
+              name: local-storage-operator.v4.12.0-202302280915-local-st-686958dd78
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: ClusterRole
+              name: local-storage-operator.v4.12.0-202302280915-local-st-686958dd78
+            subjects:
+            - kind: ServiceAccount
+              name: local-storage-admin
+              namespace: openshift-local-storage
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apiextensions.k8s.io/v1
+            kind: CustomResourceDefinition
+            metadata:
+              creationTimestamp: null
+              name: localvolumediscoveries.local.storage.openshift.io
+            spec:
+              group: local.storage.openshift.io
+              names:
+                kind: LocalVolumeDiscovery
+                listKind: LocalVolumeDiscoveryList
+                plural: localvolumediscoveries
+                singular: localvolumediscovery
+              scope: Namespaced
+              versions:
+              - name: v1alpha1
+                schema:
+                  openAPIV3Schema:
+                    description: LocalVolumeDiscovery is the Schema for the localvolumediscoveries
+                      API
+                    properties:
+                      apiVersion:
+                        description: 'APIVersion defines the versioned schema of this
+                          representation of an object. Servers should convert recognized
+                          schemas to the latest internal value, and may reject unrecognized
+                          values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                        type: string
+                      kind:
+                        description: 'Kind is a string value representing the REST
+                          resource this object represents. Servers may infer this
+                          from the endpoint the client submits requests to. Cannot
+                          be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                        type: string
+                      metadata:
+                        properties:
+                          name:
+                            enum:
+                            - auto-discover-devices
+                            type: string
+                        type: object
+                      spec:
+                        description: LocalVolumeDiscoverySpec defines the desired
+                          state of LocalVolumeDiscovery
+                        properties:
+                          nodeSelector:
+                            description: Nodes on which the automatic detection policies
+                              must run.
+                            properties:
+                              nodeSelectorTerms:
+                                description: Required. A list of node selector terms.
+                                  The terms are ORed.
+                                items:
+                                  description: A null or empty node selector term
+                                    matches no objects. The requirements of them are
+                                    ANDed. The TopologySelectorTerm type implements
+                                    a subset of the NodeSelectorTerm.
+                                  properties:
+                                    matchExpressions:
+                                      description: A list of node selector requirements
+                                        by node's labels.
+                                      items:
+                                        description: A node selector requirement is
+                                          a selector that contains values, a key,
+                                          and an operator that relates the key and
+                                          values.
+                                        properties:
+                                          key:
+                                            description: The label key that the selector
+                                              applies to.
+                                            type: string
+                                          operator:
+                                            description: Represents a key's relationship
+                                              to a set of values. Valid operators
+                                              are In, NotIn, Exists, DoesNotExist.
+                                              Gt, and Lt.
+                                            type: string
+                                          values:
+                                            description: An array of string values.
+                                              If the operator is In or NotIn, the
+                                              values array must be non-empty. If the
+                                              operator is Exists or DoesNotExist,
+                                              the values array must be empty. If the
+                                              operator is Gt or Lt, the values array
+                                              must have a single element, which will
+                                              be interpreted as an integer. This array
+                                              is replaced during a strategic merge
+                                              patch.
+                                            items:
+                                              type: string
+                                            type: array
+                                        required:
+                                        - key
+                                        - operator
+                                        type: object
+                                      type: array
+                                    matchFields:
+                                      description: A list of node selector requirements
+                                        by node's fields.
+                                      items:
+                                        description: A node selector requirement is
+                                          a selector that contains values, a key,
+                                          and an operator that relates the key and
+                                          values.
+                                        properties:
+                                          key:
+                                            description: The label key that the selector
+                                              applies to.
+                                            type: string
+                                          operator:
+                                            description: Represents a key's relationship
+                                              to a set of values. Valid operators
+                                              are In, NotIn, Exists, DoesNotExist.
+                                              Gt, and Lt.
+                                            type: string
+                                          values:
+                                            description: An array of string values.
+                                              If the operator is In or NotIn, the
+                                              values array must be non-empty. If the
+                                              operator is Exists or DoesNotExist,
+                                              the values array must be empty. If the
+                                              operator is Gt or Lt, the values array
+                                              must have a single element, which will
+                                              be interpreted as an integer. This array
+                                              is replaced during a strategic merge
+                                              patch.
+                                            items:
+                                              type: string
+                                            type: array
+                                        required:
+                                        - key
+                                        - operator
+                                        type: object
+                                      type: array
+                                  type: object
+                                type: array
+                            required:
+                            - nodeSelectorTerms
+                            type: object
+                          tolerations:
+                            description: If specified tolerations is the list of toleration
+                              that is passed to the LocalVolumeDiscovery Daemon
+                            items:
+                              description: The pod this Toleration is attached to
+                                tolerates any taint that matches the triple <key,value,effect>
+                                using the matching operator <operator>.
+                              properties:
+                                effect:
+                                  description: Effect indicates the taint effect to
+                                    match. Empty means match all taint effects. When
+                                    specified, allowed values are NoSchedule, PreferNoSchedule
+                                    and NoExecute.
+                                  type: string
+                                key:
+                                  description: Key is the taint key that the toleration
+                                    applies to. Empty means match all taint keys.
+                                    If the key is empty, operator must be Exists;
+                                    this combination means to match all values and
+                                    all keys.
+                                  type: string
+                                operator:
+                                  description: Operator represents a key's relationship
+                                    to the value. Valid operators are Exists and Equal.
+                                    Defaults to Equal. Exists is equivalent to wildcard
+                                    for value, so that a pod can tolerate all taints
+                                    of a particular category.
+                                  type: string
+                                tolerationSeconds:
+                                  description: TolerationSeconds represents the period
+                                    of time the toleration (which must be of effect
+                                    NoExecute, otherwise this field is ignored) tolerates
+                                    the taint. By default, it is not set, which means
+                                    tolerate the taint forever (do not evict). Zero
+                                    and negative values will be treated as 0 (evict
+                                    immediately) by the system.
+                                  format: int64
+                                  type: integer
+                                value:
+                                  description: Value is the taint value the toleration
+                                    matches to. If the operator is Exists, the value
+                                    should be empty, otherwise just a regular string.
+                                  type: string
+                              type: object
+                            type: array
+                        type: object
+                      status:
+                        description: LocalVolumeDiscoveryStatus defines the observed
+                          state of LocalVolumeDiscovery
+                        properties:
+                          conditions:
+                            description: Conditions are the list of conditions and
+                              their status.
+                            items:
+                              description: OperatorCondition is just the standard
+                                condition fields.
+                              properties:
+                                lastTransitionTime:
+                                  format: date-time
+                                  type: string
+                                message:
+                                  type: string
+                                reason:
+                                  type: string
+                                status:
+                                  type: string
+                                type:
+                                  type: string
+                              type: object
+                            type: array
+                          observedGeneration:
+                            description: observedGeneration is the last generation
+                              change the operator has dealt with
+                            format: int64
+                            type: integer
+                          phase:
+                            description: Phase represents the current phase of discovery
+                              process This is used by the OLM UI to provide status
+                              information to the user
+                            type: string
+                        type: object
+                    required:
+                    - spec
+                    type: object
+                served: true
+                storage: true
+                subresources:
+                  status: {}
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apiextensions.k8s.io/v1
+            kind: CustomResourceDefinition
+            metadata:
+              creationTimestamp: null
+              name: localvolumediscoveryresults.local.storage.openshift.io
+            spec:
+              group: local.storage.openshift.io
+              names:
+                kind: LocalVolumeDiscoveryResult
+                listKind: LocalVolumeDiscoveryResultList
+                plural: localvolumediscoveryresults
+                singular: localvolumediscoveryresult
+              scope: Namespaced
+              versions:
+              - name: v1alpha1
+                schema:
+                  openAPIV3Schema:
+                    description: LocalVolumeDiscoveryResult is the Schema for the
+                      localvolumediscoveryresults API
+                    properties:
+                      apiVersion:
+                        description: 'APIVersion defines the versioned schema of this
+                          representation of an object. Servers should convert recognized
+                          schemas to the latest internal value, and may reject unrecognized
+                          values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                        type: string
+                      kind:
+                        description: 'Kind is a string value representing the REST
+                          resource this object represents. Servers may infer this
+                          from the endpoint the client submits requests to. Cannot
+                          be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                        type: string
+                      metadata:
+                        type: object
+                      spec:
+                        description: LocalVolumeDiscoveryResultSpec defines the desired
+                          state of LocalVolumeDiscoveryResult
+                        properties:
+                          nodeName:
+                            description: Node on which the devices are discovered
+                            type: string
+                        required:
+                        - nodeName
+                        type: object
+                      status:
+                        description: LocalVolumeDiscoveryResultStatus defines the
+                          observed state of LocalVolumeDiscoveryResult
+                        properties:
+                          discoveredDevices:
+                            description: DiscoveredDevices contains the list of devices
+                              on which LSO is capable of creating LocalPVs The devices
+                              in this list qualify these following conditions. - it
+                              should be a non-removable device. - it should not be
+                              a read-only device. - it should not be mounted anywhere
+                              - it should not be a boot device - it should not have
+                              child partitions
+                            items:
+                              description: DiscoveredDevice shows the list of discovered
+                                devices with their properties
+                              properties:
+                                deviceID:
+                                  description: DeviceID represents the persistent
+                                    name of the device. For eg, /dev/disk/by-id/...
+                                  type: string
+                                fstype:
+                                  description: FSType represents the filesystem available
+                                    on the device
+                                  type: string
+                                model:
+                                  description: Model of the discovered device
+                                  type: string
+                                path:
+                                  description: Path represents the device path. For
+                                    eg, /dev/sdb
+                                  type: string
+                                property:
+                                  description: Property represents whether the device
+                                    type is rotational or not
+                                  type: string
+                                serial:
+                                  description: Serial number of the disk
+                                  type: string
+                                size:
+                                  description: Size of the discovered device
+                                  format: int64
+                                  type: integer
+                                status:
+                                  description: Status defines whether the device is
+                                    available for use or not
+                                  properties:
+                                    state:
+                                      description: State shows the availability of
+                                        the device
+                                      type: string
+                                  required:
+                                  - state
+                                  type: object
+                                type:
+                                  description: Type of the discovered device
+                                  type: string
+                                vendor:
+                                  description: Vendor of the discovered device
+                                  type: string
+                              required:
+                              - deviceID
+                              - fstype
+                              - model
+                              - path
+                              - property
+                              - serial
+                              - size
+                              - status
+                              - type
+                              - vendor
+                              type: object
+                            type: array
+                          discoveredTimeStamp:
+                            description: DiscoveredTimeStamp is the last timestamp
+                              when the list of discovered devices was updated
+                            type: string
+                        type: object
+                    type: object
+                served: true
+                storage: true
+                subresources:
+                  status: {}
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apiextensions.k8s.io/v1
+            kind: CustomResourceDefinition
+            metadata:
+              creationTimestamp: null
+              name: localvolumesets.local.storage.openshift.io
+            spec:
+              group: local.storage.openshift.io
+              names:
+                kind: LocalVolumeSet
+                listKind: LocalVolumeSetList
+                plural: localvolumesets
+                shortNames:
+                - lvset
+                - lvsets
+                singular: localvolumeset
+              scope: Namespaced
+              versions:
+              - additionalPrinterColumns:
+                - description: StorageClass
+                  jsonPath: .spec.storageClassName
+                  name: StorageClass
+                  type: string
+                - description: The number of PVs provisioned for this LocalVolumeSet's
+                    StorageClass
+                  jsonPath: .status.totalProvisionedDeviceCount
+                  name: Provisioned
+                  type: integer
+                - jsonPath: .metadata.creationTimestamp
+                  name: Age
+                  type: date
+                name: v1alpha1
+                schema:
+                  openAPIV3Schema:
+                    description: LocalVolumeSet enables automatic provisioning of
+                      local PersistentVolumes based on specified criteria.
+                    properties:
+                      spec:
+                        description: LocalVolumeSetSpec defines the desired state
+                          of LocalVolumeSet
+                        properties:
+                          deviceInclusionSpec:
+                            description: DeviceInclusionSpec is the filtration rule
+                              for including a device in the device discovery
+                            properties:
+                              deviceMechanicalProperties:
+                                description: DeviceMechanicalProperty denotes whether
+                                  Rotational or NonRotational disks should be used.
+                                  by default, it selects both
+                                items:
+                                  description: DeviceMechanicalProperty holds the
+                                    device's mechanical spec. It can be rotational
+                                    or nonRotational
+                                  type: string
+                                type: array
+                              deviceTypes:
+                                description: 'Devices is the list of devices that
+                                  should be used for automatic detection. This would
+                                  be one of the types supported by the local-storage
+                                  operator. Currently, the supported types are: disk,
+                                  part. If the list is empty no devices will be selected.'
+                                items:
+                                  description: DeviceType is the types that will be
+                                    supported by the LSO.
+                                  enum:
+                                  - disk
+                                  - part
+                                  - loop
+                                  - mpath
+                                  type: string
+                                type: array
+                              maxSize:
+                                description: MaxSize is the maximum size of the device
+                                  which needs to be included
+                                type: string
+                              minSize:
+                                description: MinSize is the minimum size of the device
+                                  which needs to be included. Defaults to `1Gi` if
+                                  empty.
+                                type: string
+                              models:
+                                description: Models is a list of device models. If
+                                  not empty, the device's model as outputted by lsblk
+                                  needs to contain at least one of these strings.
+                                items:
+                                  type: string
+                                type: array
+                              vendors:
+                                description: Vendors is a list of device vendors.
+                                  If not empty, the device's model as outputted by
+                                  lsblk needs to contain at least one of these strings.
+                                items:
+                                  type: string
+                                type: array
+                            type: object
+                          fsType:
+                            description: FSType type to create when volumeMode is
+                              Filesystem
+                            type: string
+                          maxDeviceCount:
+                            description: Maximum number of Devices that needs to be
+                              detected per node. If omitted, there will be no maximum.
+                            format: int32
+                            type: integer
+                          nodeSelector:
+                            description: Nodes on which the automatic detection policies
+                              must run.
+                            properties:
+                              nodeSelectorTerms:
+                                description: Required. A list of node selector terms.
+                                  The terms are ORed.
+                                items:
+                                  description: A null or empty node selector term
+                                    matches no objects. The requirements of them are
+                                    ANDed. The TopologySelectorTerm type implements
+                                    a subset of the NodeSelectorTerm.
+                                  properties:
+                                    matchExpressions:
+                                      description: A list of node selector requirements
+                                        by node's labels.
+                                      items:
+                                        description: A node selector requirement is
+                                          a selector that contains values, a key,
+                                          and an operator that relates the key and
+                                          values.
+                                        properties:
+                                          key:
+                                            description: The label key that the selector
+                                              applies to.
+                                            type: string
+                                          operator:
+                                            description: Represents a key's relationship
+                                              to a set of values. Valid operators
+                                              are In, NotIn, Exists, DoesNotExist.
+                                              Gt, and Lt.
+                                            type: string
+                                          values:
+                                            description: An array of string values.
+                                              If the operator is In or NotIn, the
+                                              values array must be non-empty. If the
+                                              operator is Exists or DoesNotExist,
+                                              the values array must be empty. If the
+                                              operator is Gt or Lt, the values array
+                                              must have a single element, which will
+                                              be interpreted as an integer. This array
+                                              is replaced during a strategic merge
+                                              patch.
+                                            items:
+                                              type: string
+                                            type: array
+                                        required:
+                                        - key
+                                        - operator
+                                        type: object
+                                      type: array
+                                    matchFields:
+                                      description: A list of node selector requirements
+                                        by node's fields.
+                                      items:
+                                        description: A node selector requirement is
+                                          a selector that contains values, a key,
+                                          and an operator that relates the key and
+                                          values.
+                                        properties:
+                                          key:
+                                            description: The label key that the selector
+                                              applies to.
+                                            type: string
+                                          operator:
+                                            description: Represents a key's relationship
+                                              to a set of values. Valid operators
+                                              are In, NotIn, Exists, DoesNotExist.
+                                              Gt, and Lt.
+                                            type: string
+                                          values:
+                                            description: An array of string values.
+                                              If the operator is In or NotIn, the
+                                              values array must be non-empty. If the
+                                              operator is Exists or DoesNotExist,
+                                              the values array must be empty. If the
+                                              operator is Gt or Lt, the values array
+                                              must have a single element, which will
+                                              be interpreted as an integer. This array
+                                              is replaced during a strategic merge
+                                              patch.
+                                            items:
+                                              type: string
+                                            type: array
+                                        required:
+                                        - key
+                                        - operator
+                                        type: object
+                                      type: array
+                                  type: object
+                                type: array
+                            required:
+                            - nodeSelectorTerms
+                            type: object
+                          storageClassName:
+                            description: StorageClassName to use for set of matched
+                              devices
+                            type: string
+                          tolerations:
+                            description: If specified, a list of tolerations to pass
+                              to the discovery daemons.
+                            items:
+                              description: The pod this Toleration is attached to
+                                tolerates any taint that matches the triple <key,value,effect>
+                                using the matching operator <operator>.
+                              properties:
+                                effect:
+                                  description: Effect indicates the taint effect to
+                                    match. Empty means match all taint effects. When
+                                    specified, allowed values are NoSchedule, PreferNoSchedule
+                                    and NoExecute.
+                                  type: string
+                                key:
+                                  description: Key is the taint key that the toleration
+                                    applies to. Empty means match all taint keys.
+                                    If the key is empty, operator must be Exists;
+                                    this combination means to match all values and
+                                    all keys.
+                                  type: string
+                                operator:
+                                  description: Operator represents a key's relationship
+                                    to the value. Valid operators are Exists and Equal.
+                                    Defaults to Equal. Exists is equivalent to wildcard
+                                    for value, so that a pod can tolerate all taints
+                                    of a particular category.
+                                  type: string
+                                tolerationSeconds:
+                                  description: TolerationSeconds represents the period
+                                    of time the toleration (which must be of effect
+                                    NoExecute, otherwise this field is ignored) tolerates
+                                    the taint. By default, it is not set, which means
+                                    tolerate the taint forever (do not evict). Zero
+                                    and negative values will be treated as 0 (evict
+                                    immediately) by the system.
+                                  format: int64
+                                  type: integer
+                                value:
+                                  description: Value is the taint value the toleration
+                                    matches to. If the operator is Exists, the value
+                                    should be empty, otherwise just a regular string.
+                                  type: string
+                              type: object
+                            type: array
+                          volumeMode:
+                            description: VolumeMode determines whether the PV created
+                              is Block or Filesystem. It will default to Filesystem
+                            enum:
+                            - Block
+                            - Filesystem
+                            type: string
+                        required:
+                        - storageClassName
+                        type: object
+                      status:
+                        description: LocalVolumeSetStatus defines the observed state
+                          of LocalVolumeSet
+                        properties:
+                          conditions:
+                            description: Conditions is a list of conditions and their
+                              status.
+                            items:
+                              description: OperatorCondition is just the standard
+                                condition fields.
+                              properties:
+                                lastTransitionTime:
+                                  format: date-time
+                                  type: string
+                                message:
+                                  type: string
+                                reason:
+                                  type: string
+                                status:
+                                  type: string
+                                type:
+                                  type: string
+                              type: object
+                            type: array
+                          observedGeneration:
+                            description: observedGeneration is the last generation
+                              change the operator has dealt with
+                            format: int64
+                            type: integer
+                          totalProvisionedDeviceCount:
+                            description: TotalProvisionedDeviceCount is the count
+                              of the total devices over which the PVs has been provisioned
+                            format: int32
+                            type: integer
+                        type: object
+                    required:
+                    - spec
+                    type: object
+                served: true
+                storage: true
+                subresources:
+                  status: {}
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apiextensions.k8s.io/v1
+            kind: CustomResourceDefinition
+            metadata:
+              creationTimestamp: null
+              name: localvolumes.local.storage.openshift.io
+            spec:
+              group: local.storage.openshift.io
+              names:
+                kind: LocalVolume
+                listKind: LocalVolumeList
+                plural: localvolumes
+                singular: localvolume
+              scope: Namespaced
+              versions:
+              - name: v1
+                schema:
+                  openAPIV3Schema:
+                    description: LocalVolume is a local storage configuration used
+                      by the operator
+                    properties:
+                      apiVersion:
+                        description: 'APIVersion defines the versioned schema of this
+                          representation of an object. Servers should convert recognized
+                          schemas to the latest internal value, and may reject unrecognized
+                          values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+                        type: string
+                      kind:
+                        description: 'Kind is a string value representing the REST
+                          resource this object represents. Servers may infer this
+                          from the endpoint the client submits requests to. Cannot
+                          be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+                        type: string
+                      metadata:
+                        type: object
+                      spec:
+                        description: spec is the specification of the desired state
+                          of selected local devices
+                        properties:
+                          logLevel:
+                            description: logLevel configures log level for the diskmaker
+                              and provisioner for this object
+                            enum:
+                            - Normal
+                            - Debug
+                            - Trace
+                            - TraceAll
+                            type: string
+                          managementState:
+                            description: Indicates whether and how the operator should
+                              manage the component
+                            enum:
+                            - Managed
+                            - Unmanaged
+                            - Removed
+                            - Force
+                            type: string
+                          nodeSelector:
+                            description: Nodes on which the provisioner must run
+                            type: object
+                            x-kubernetes-preserve-unknown-fields: true
+                          storageClassDevices:
+                            description: List of storage class and devices they can
+                              match
+                            items:
+                              properties:
+                                devicePaths:
+                                  description: A list of devices which would be chosen
+                                    for local storage. For example - ["/dev/sda",
+                                    "/dev/sdb", "/dev/disk/by-id/ata-crucial"]. It
+                                    is strongly recommended to use the unique /dev/disk/by-id/...
+                                    name if available, as these identifiers persist
+                                    across node restarts.
+                                  items:
+                                    type: string
+                                  type: array
+                                fsType:
+                                  description: File system type to create on empty
+                                    volumes, such as "ext4" or "xfs". Used only when
+                                    volumeMode is "Filesystem". Leave blank when volumeMode
+                                    is "Block".
+                                  type: string
+                                storageClassName:
+                                  description: StorageClass name to use for set of
+                                    matched devices
+                                  type: string
+                                volumeMode:
+                                  description: Volume mode. Block or Filesystem
+                                  enum:
+                                  - Block
+                                  - Filesystem
+                                  type: string
+                              required:
+                              - storageClassName
+                              - devicePaths
+                              type: object
+                            type: array
+                          tolerations:
+                            description: A list of tolerations to pass to the diskmaker
+                              and provisioner DaemonSets.
+                            items:
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            type: array
+                        required:
+                        - storageClassDevices
+                        type: object
+                      status:
+                        description: status is the most recently observed status selected
+                          local devices
+                        properties:
+                          conditions:
+                            description: conditions is a list of conditions and their
+                              status
+                            items:
+                              description: OperatorCondition is just the standard
+                                condition fields
+                              properties:
+                                lastTransitionTime:
+                                  format: date-time
+                                  type: string
+                                message:
+                                  type: string
+                                reason:
+                                  type: string
+                                status:
+                                  enum:
+                                  - "True"
+                                  - "False"
+                                  - Unknown
+                                  type: string
+                                type:
+                                  type: string
+                              required:
+                              - type
+                              - status
+                              type: object
+                            type: array
+                          generations:
+                            description: generations are used to determine when an
+                              item needs to be reconciled or has changed in a way
+                              that needs a reaction.
+                            items:
+                              description: GenerationStatus keeps track of the generation
+                                for a given resource so that decisions about forced
+                                updates can be made.
+                              properties:
+                                group:
+                                  type: string
+                                lastGeneration:
+                                  format: int64
+                                  type: integer
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
+                                resource:
+                                  type: string
+                              required:
+                              - group
+                              - resource
+                              - namespace
+                              - name
+                              - lastGeneration
+                              type: object
+                            type: array
+                          managementState:
+                            enum:
+                            - Managed
+                            - Unmanaged
+                            - Removed
+                            - Force
+                            type: string
+                          observedGeneration:
+                            format: int64
+                            type: integer
+                          readyReplicas:
+                            format: int32
+                            type: integer
+                        required:
+                        - conditions
+                        - generations
+                        type: object
+                    required:
+                    - spec
+                    type: object
+                served: true
+                storage: true
+                subresources:
+                  status: {}
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: RoleBinding
+            metadata:
+              name: local-storage-metrics
+              namespace: openshift-local-storage
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: Role
+              name: local-storage-metrics
+            subjects:
+            - kind: ServiceAccount
+              name: prometheus-k8s
+              namespace: openshift-monitoring
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: Role
+            metadata:
+              name: local-storage-metrics
+              namespace: openshift-local-storage
+            rules:
+            - apiGroups:
+              - ""
+              resources:
+              - services
+              - endpoints
+              - pods
+              verbs:
+              - get
+              - list
+              - watch
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              annotations:
+                alm-examples: |-
+                  [
+                    {
+                      "apiVersion": "local.storage.openshift.io/v1",
+                      "kind": "LocalVolume",
+                      "metadata": {
+                        "name": "example"
+                      },
+                      "spec": {
+                        "storageClassDevices": [
+                          {
+                            "devicePaths": [
+                              "/dev/disk/by-id/ata-crucial"
+                            ],
+                            "fsType": "ext4",
+                            "storageClassName": "foobar",
+                            "volumeMode": "Filesystem"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "apiVersion": "local.storage.openshift.io/v1alpha1",
+                      "kind": "LocalVolumeSet",
+                      "metadata": {
+                        "name": "example-localvolumeset"
+                      },
+                      "spec": {
+                        "deviceInclusionSpec": {
+                          "deviceMechanicalProperties": [
+                            "Rotational",
+                            "NonRotational"
+                          ],
+                          "deviceTypes": [
+                            "RawDisk"
+                          ],
+                          "maxSize": "100G",
+                          "minSize": "10G"
+                        },
+                        "maxDeviceCount": 10,
+                        "nodeSelector": {
+                          "nodeSelectorTerms": [
+                            {
+                              "matchExpressions": [
+                                {
+                                  "key": "kubernetes.io/hostname",
+                                  "operator": "In",
+                                  "values": [
+                                    "worker-0",
+                                    "worker-1"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "storageClassName": "example-storageclass",
+                        "volumeMode": "Block"
+                      }
+                    },
+                    {
+                      "apiVersion": "local.storage.openshift.io/v1alpha1",
+                      "kind": "LocalVolumeDiscovery",
+                      "metadata": {
+                        "name": "auto-discover-devices"
+                      },
+                      "spec": {
+                        "nodeSelector": {
+                          "nodeSelectorTerms": [
+                            {
+                              "matchExpressions": [
+                                {
+                                  "key": "kubernetes.io/hostname",
+                                  "operator": "In",
+                                  "values": [
+                                    "worker-0",
+                                    "worker-1"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                capabilities: Full Lifecycle
+                categories: Storage
+                containerImage: registry.redhat.io/openshift4/ose-local-storage-operator@sha256:c2e890e5872a4e8cfba1e1a77a13b9a7945ff9d10d619fa4b99322a75123e04e
+                createdAt: "2019-08-14T00:00:00Z"
+                description: Configure and use local storage volumes.
+                olm.skipRange: '>=4.3.0 <4.12.0-202302280915'
+                olm.targetNamespaces: openshift-local-storage
+                operatorframework.io/cluster-monitoring: "true"
+                operatorframework.io/suggested-namespace: openshift-local-storage
+                operators.openshift.io/infrastructure-features: '["disconnected"]'
+                operators.openshift.io/valid-subscription: '["OpenShift Kubernetes
+                  Engine", "OpenShift Container Platform", "OpenShift Platform Plus"]'
+                operators.operatorframework.io/internal-objects: '["localvolumediscoveryresults.local.storage.openshift.io"]'
+                repository: https://github.com/openshift/local-storage-operator
+                support: Red Hat
+                target.workload.openshift.io/management: '{"effect": "PreferredDuringScheduling"}'
+              creationTimestamp: null
+              name: local-storage-operator
+              namespace: openshift-local-storage
+            spec:
+              replicas: 1
+              selector:
+                matchLabels:
+                  name: local-storage-operator
+              strategy: {}
+              template:
+                metadata:
+                  annotations:
+                    target.workload.openshift.io/management: '{"effect": "PreferredDuringScheduling"}'
+                  creationTimestamp: null
+                  labels:
+                    name: local-storage-operator
+                spec:
+                  containers:
+                  - args:
+                    - --leader-elect
+                    command:
+                    - local-storage-operator
+                    env:
+                    - name: WATCH_NAMESPACE
+                      valueFrom:
+                        fieldRef:
+                          fieldPath: metadata.namespace
+                    - name: DISKMAKER_IMAGE
+                      value: registry.redhat.io/openshift4/ose-local-storage-diskmaker@sha256:c34bdfc699378bd010d8b8f4e631d1a8e7f27eb7b8a24a80a0322b5a26098f5a
+                    - name: KUBE_RBAC_PROXY_IMAGE
+                      value: registry.redhat.io/openshift4/ose-kube-rbac-proxy@sha256:5df24a774bdcc0363e59bcf351806e6671e69d7553d9f123481a202558b83615
+                    - name: PRIORITY_CLASS_NAME
+                      value: openshift-user-critical
+                    image: registry.redhat.io/openshift4/ose-local-storage-operator@sha256:c2e890e5872a4e8cfba1e1a77a13b9a7945ff9d10d619fa4b99322a75123e04e
+                    imagePullPolicy: IfNotPresent
+                    name: local-storage-operator
+                    ports:
+                    - containerPort: 60000
+                      name: metrics
+                    resources:
+                      requests:
+                        cpu: 10m
+                        memory: 50Mi
+                  priorityClassName: openshift-user-critical
+                  serviceAccountName: local-storage-operator
         remediationAction: inform
         severity: low
   remediationAction: inform

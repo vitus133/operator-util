@@ -12,7 +12,7 @@ policies:
     manifests:
       - path: sriov-network-operator.v4.12.0-202302280915
       # - path: ptp-operator.4.12.0-202303021731
-      # - path: local-storage-operator.v4.12.0-202302280915
+      - path: local-storage-operator.v4.12.0-202302280915
       # - path: cluster-logging.5.5.4
     remediationAction: inform
     placement:
