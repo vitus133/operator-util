@@ -108,18 +108,10 @@ Run command:
 kustomize build --enable-alpha-plugins . > wrapped.yaml
 ```
 Apply the wrapped manifests to your hub.
-## Debug
-What have I done manually?
-1. Create customization files for each operator - fixed
-1. Add management annotations to all the namespaces - fixed
-### sriov-network-operator
-1. Add namespace to the supported nics configmap - done
-2. Remove status field from CRD - otherwise policies are not getting compliant - done
+
 ## Plans
-1. Add management annotation to the namespace - done
-1. implement policy wrapper - done
-2. research how to handle ApiServiceDefinitions and WebhookDefinition - WIP
-3. use makefile
-4. use config file so user won't need to copy temporary file names form one command to another
-5. do pulling and rendering in go, so it can be reused in TALM
+1. research how to handle ApiServiceDefinitions and WebhookDefinition - WIP
+1. use makefile
+1. use config file so user won't need to copy temporary file names form one command to another
+1. do pulling and rendering in go, so it can be reused in TALM
 
