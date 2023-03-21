@@ -1,152 +1,150 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    alm-examples: |-
-      [
-        {
-          "apiVersion": "local.storage.openshift.io/v1",
-          "kind": "LocalVolume",
-          "metadata": {
-            "name": "example"
-          },
-          "spec": {
-            "storageClassDevices": [
+    annotations:
+        alm-examples: |-
+            [
               {
-                "devicePaths": [
-                  "/dev/disk/by-id/ata-crucial"
-                ],
-                "fsType": "ext4",
-                "storageClassName": "foobar",
-                "volumeMode": "Filesystem"
+                "apiVersion": "local.storage.openshift.io/v1",
+                "kind": "LocalVolume",
+                "metadata": {
+                  "name": "example"
+                },
+                "spec": {
+                  "storageClassDevices": [
+                    {
+                      "devicePaths": [
+                        "/dev/disk/by-id/ata-crucial"
+                      ],
+                      "fsType": "ext4",
+                      "storageClassName": "foobar",
+                      "volumeMode": "Filesystem"
+                    }
+                  ]
+                }
+              },
+              {
+                "apiVersion": "local.storage.openshift.io/v1alpha1",
+                "kind": "LocalVolumeSet",
+                "metadata": {
+                  "name": "example-localvolumeset"
+                },
+                "spec": {
+                  "deviceInclusionSpec": {
+                    "deviceMechanicalProperties": [
+                      "Rotational",
+                      "NonRotational"
+                    ],
+                    "deviceTypes": [
+                      "RawDisk"
+                    ],
+                    "maxSize": "100G",
+                    "minSize": "10G"
+                  },
+                  "maxDeviceCount": 10,
+                  "nodeSelector": {
+                    "nodeSelectorTerms": [
+                      {
+                        "matchExpressions": [
+                          {
+                            "key": "kubernetes.io/hostname",
+                            "operator": "In",
+                            "values": [
+                              "worker-0",
+                              "worker-1"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "storageClassName": "example-storageclass",
+                  "volumeMode": "Block"
+                }
+              },
+              {
+                "apiVersion": "local.storage.openshift.io/v1alpha1",
+                "kind": "LocalVolumeDiscovery",
+                "metadata": {
+                  "name": "auto-discover-devices"
+                },
+                "spec": {
+                  "nodeSelector": {
+                    "nodeSelectorTerms": [
+                      {
+                        "matchExpressions": [
+                          {
+                            "key": "kubernetes.io/hostname",
+                            "operator": "In",
+                            "values": [
+                              "worker-0",
+                              "worker-1"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
               }
             ]
-          }
-        },
-        {
-          "apiVersion": "local.storage.openshift.io/v1alpha1",
-          "kind": "LocalVolumeSet",
-          "metadata": {
-            "name": "example-localvolumeset"
-          },
-          "spec": {
-            "deviceInclusionSpec": {
-              "deviceMechanicalProperties": [
-                "Rotational",
-                "NonRotational"
-              ],
-              "deviceTypes": [
-                "RawDisk"
-              ],
-              "maxSize": "100G",
-              "minSize": "10G"
-            },
-            "maxDeviceCount": 10,
-            "nodeSelector": {
-              "nodeSelectorTerms": [
-                {
-                  "matchExpressions": [
-                    {
-                      "key": "kubernetes.io/hostname",
-                      "operator": "In",
-                      "values": [
-                        "worker-0",
-                        "worker-1"
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            "storageClassName": "example-storageclass",
-            "volumeMode": "Block"
-          }
-        },
-        {
-          "apiVersion": "local.storage.openshift.io/v1alpha1",
-          "kind": "LocalVolumeDiscovery",
-          "metadata": {
-            "name": "auto-discover-devices"
-          },
-          "spec": {
-            "nodeSelector": {
-              "nodeSelectorTerms": [
-                {
-                  "matchExpressions": [
-                    {
-                      "key": "kubernetes.io/hostname",
-                      "operator": "In",
-                      "values": [
-                        "worker-0",
-                        "worker-1"
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      ]
-    capabilities: Full Lifecycle
-    categories: Storage
-    containerImage: registry.redhat.io/openshift4/ose-local-storage-operator@sha256:c2e890e5872a4e8cfba1e1a77a13b9a7945ff9d10d619fa4b99322a75123e04e
-    createdAt: "2019-08-14T00:00:00Z"
-    description: Configure and use local storage volumes.
-    olm.skipRange: '>=4.3.0 <4.12.0-202302280915'
-    olm.targetNamespaces: openshift-local-storage
-    operatorframework.io/cluster-monitoring: "true"
-    operatorframework.io/suggested-namespace: openshift-local-storage
-    operators.openshift.io/infrastructure-features: '["disconnected"]'
-    operators.openshift.io/valid-subscription: '["OpenShift Kubernetes Engine", "OpenShift
-      Container Platform", "OpenShift Platform Plus"]'
-    operators.operatorframework.io/internal-objects: '["localvolumediscoveryresults.local.storage.openshift.io"]'
-    repository: https://github.com/openshift/local-storage-operator
-    support: Red Hat
-    target.workload.openshift.io/management: '{"effect": "PreferredDuringScheduling"}'
-  creationTimestamp: null
-  name: local-storage-operator
-  namespace: openshift-local-storage
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: local-storage-operator
-  strategy: {}
-  template:
-    metadata:
-      annotations:
+        capabilities: Full Lifecycle
+        categories: Storage
+        containerImage: registry.redhat.io/openshift4/ose-local-storage-operator@sha256:c2e890e5872a4e8cfba1e1a77a13b9a7945ff9d10d619fa4b99322a75123e04e
+        createdAt: "2019-08-14T00:00:00Z"
+        description: Configure and use local storage volumes.
+        olm.skipRange: '>=4.3.0 <4.12.0-202302280915'
+        olm.targetNamespaces: openshift-local-storage
+        operatorframework.io/cluster-monitoring: "true"
+        operatorframework.io/suggested-namespace: openshift-local-storage
+        operators.openshift.io/infrastructure-features: '["disconnected"]'
+        operators.openshift.io/valid-subscription: '["OpenShift Kubernetes Engine", "OpenShift Container Platform", "OpenShift Platform Plus"]'
+        operators.operatorframework.io/internal-objects: '["localvolumediscoveryresults.local.storage.openshift.io"]'
+        repository: https://github.com/openshift/local-storage-operator
+        support: Red Hat
         target.workload.openshift.io/management: '{"effect": "PreferredDuringScheduling"}'
-      creationTimestamp: null
-      labels:
-        name: local-storage-operator
-    spec:
-      containers:
-      - args:
-        - --leader-elect
-        command:
-        - local-storage-operator
-        env:
-        - name: WATCH_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: DISKMAKER_IMAGE
-          value: registry.redhat.io/openshift4/ose-local-storage-diskmaker@sha256:c34bdfc699378bd010d8b8f4e631d1a8e7f27eb7b8a24a80a0322b5a26098f5a
-        - name: KUBE_RBAC_PROXY_IMAGE
-          value: registry.redhat.io/openshift4/ose-kube-rbac-proxy@sha256:5df24a774bdcc0363e59bcf351806e6671e69d7553d9f123481a202558b83615
-        - name: PRIORITY_CLASS_NAME
-          value: openshift-user-critical
-        image: registry.redhat.io/openshift4/ose-local-storage-operator@sha256:c2e890e5872a4e8cfba1e1a77a13b9a7945ff9d10d619fa4b99322a75123e04e
-        imagePullPolicy: IfNotPresent
-        name: local-storage-operator
-        ports:
-        - containerPort: 60000
-          name: metrics
-        resources:
-          requests:
-            cpu: 10m
-            memory: 50Mi
-      priorityClassName: openshift-user-critical
-      serviceAccountName: local-storage-operator
-status: {}
+    creationTimestamp: null
+    name: local-storage-operator
+    namespace: openshift-local-storage
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            name: local-storage-operator
+    strategy: {}
+    template:
+        metadata:
+            annotations:
+                target.workload.openshift.io/management: '{"effect": "PreferredDuringScheduling"}'
+            creationTimestamp: null
+            labels:
+                name: local-storage-operator
+        spec:
+            containers:
+                - args:
+                    - --leader-elect
+                  command:
+                    - local-storage-operator
+                  env:
+                    - name: WATCH_NAMESPACE
+                      valueFrom:
+                        fieldRef:
+                            fieldPath: metadata.namespace
+                    - name: DISKMAKER_IMAGE
+                      value: registry.redhat.io/openshift4/ose-local-storage-diskmaker@sha256:c34bdfc699378bd010d8b8f4e631d1a8e7f27eb7b8a24a80a0322b5a26098f5a
+                    - name: KUBE_RBAC_PROXY_IMAGE
+                      value: registry.redhat.io/openshift4/ose-kube-rbac-proxy@sha256:5df24a774bdcc0363e59bcf351806e6671e69d7553d9f123481a202558b83615
+                    - name: PRIORITY_CLASS_NAME
+                      value: openshift-user-critical
+                  image: registry.redhat.io/openshift4/ose-local-storage-operator@sha256:c2e890e5872a4e8cfba1e1a77a13b9a7945ff9d10d619fa4b99322a75123e04e
+                  imagePullPolicy: IfNotPresent
+                  name: local-storage-operator
+                  ports:
+                    - containerPort: 60000
+                      name: metrics
+                  resources:
+                    requests:
+                        cpu: 10m
+                        memory: 50Mi
+            priorityClassName: openshift-user-critical
+            serviceAccountName: local-storage-operator

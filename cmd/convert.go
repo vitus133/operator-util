@@ -58,8 +58,10 @@ func convertBundle(args []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	kustomization := make(map[string][]string)
+	var yamlData []byte
 	for _, obj := range plain.Objects {
-		yamlData, err := yaml.Marshal(obj)
+		yamlData, err = yaml.Marshal(obj)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -82,6 +84,15 @@ func convertBundle(args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-	}
+		kustomization["resources"] = append(kustomization["resources"], fn)
 
+	}
+	yamlData, err = yamlv3.Marshal(kustomization)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = os.WriteFile(filepath.Join(outputPath, "kustomization.yaml"), yamlData, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
