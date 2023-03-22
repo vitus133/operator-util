@@ -110,6 +110,18 @@ kustomize build --enable-alpha-plugins . > wrapped.yaml
 ```
 Apply the wrapped manifests to your hub.
 
+#### 4. Special case - ptp operator
+For this PoC PTP operator is not installed. Only linuxptp-daemon and associated resources are generated and installed
+directly on the node (through a policy)
+Following items must be done manually:
+1. The `openshift-ptp` namespace is hard-coded in templates. It is mandatory to use the `--override-namespace openshift-ptp` when converting the bundle, for example:
+```bash
+$ go run main.go convert --input /tmp/tmp.zkGHjiFvTP --override-namespace openshift-ptp
+```
+2. The PTP configuration is done through a [configmap](templates/ptp-configmap.yaml). The data key must be equal to the node name (`cnfdf12` in this example). Change it manually befor running the conversion command
+3. The daemonset template is currently hardcoded in [templates/ptp-daemon.yaml](templates/ptp-daemon.yaml) and not loadeed from ptp-operator image
+
+
 ## Plans
 1. research how to handle ApiServiceDefinitions and WebhookDefinition - WIP
 1. use makefile
