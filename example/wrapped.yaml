@@ -1284,18 +1284,19 @@ spec:
             apiVersion: v1
             data:
               cnfdf12: '[{"name":"oc-1","interface":"ens1f0","phc2sysOpts":"-a -r
-                -m -n 24 --step_threshold 2.0", "ptp4lOpts":"-2 -s", "ptp4lConf":"[global]\n#\n#
-                Default Data Set\n#\ntwoStepFlag 1\nslaveOnly 0\npriority1 128\npriority2
-                128\ndomainNumber 24\n#utc_offset 37\nclockClass 255\nclockAccuracy
-                0xFE\noffsetScaledLogVariance 0xFFFF\nfree_running 0\nfreq_est_interval
-                1\ndscp_event 0\ndscp_general 0\ndataset_comparison G.8275.x\nG.8275.defaultDS.localPriority
-                128\n#\n# Port Data Set\n#\nlogAnnounceInterval -3\nlogSyncInterval
-                -4\nlogMinDelayReqInterval -4\nlogMinPdelayReqInterval -4\nannounceReceiptTimeout
-                3\nsyncReceiptTimeout 0\ndelayAsymmetry 0\nfault_reset_interval 4\nneighborPropDelayThresh
-                20000000\nmasterOnly 0\nG.8275.portDS.localPriority 128\n#\n# Run
-                time options\n#\nassume_two_step 0\nlogging_level 6\npath_trace_enabled
-                0\nfollow_up_info 0\nhybrid_e2e 0\ninhibit_multicast_service 0\nnet_sync_monitor
-                0\ntc_spanning_tree 0\ntx_timestamp_timeout 50\nunicast_listen 0\nunicast_master_table
+                -m -n 24 --step_threshold 2.0","ptpSchedulingPolicy":"SCHED_FIFO","ptpSchedulingPriority":32,
+                "ptp4lOpts":"-2 -s", "ptp4lConf":"[global]\n#\n# Default Data Set\n#\ntwoStepFlag
+                1\nslaveOnly 0\npriority1 128\npriority2 128\ndomainNumber 24\n#utc_offset
+                37\nclockClass 255\nclockAccuracy 0xFE\noffsetScaledLogVariance 0xFFFF\nfree_running
+                0\nfreq_est_interval 1\ndscp_event 0\ndscp_general 0\ndataset_comparison
+                G.8275.x\nG.8275.defaultDS.localPriority 128\n#\n# Port Data Set\n#\nlogAnnounceInterval
+                -3\nlogSyncInterval -4\nlogMinDelayReqInterval -4\nlogMinPdelayReqInterval
+                -4\nannounceReceiptTimeout 3\nsyncReceiptTimeout 0\ndelayAsymmetry
+                0\nfault_reset_interval 4\nneighborPropDelayThresh 20000000\nmasterOnly
+                0\nG.8275.portDS.localPriority 128\n#\n# Run time options\n#\nassume_two_step
+                0\nlogging_level 6\npath_trace_enabled 0\nfollow_up_info 0\nhybrid_e2e
+                0\ninhibit_multicast_service 0\nnet_sync_monitor 0\ntc_spanning_tree
+                0\ntx_timestamp_timeout 50\nunicast_listen 0\nunicast_master_table
                 0\nunicast_req_duration 3600\nuse_syslog 1\nverbose 0\nsummary_interval
                 0\nkernel_leap 1\ncheck_fup_sync 0\n#\n# Servo Options\n#\npi_proportional_const
                 0.0\npi_integral_const 0.0\npi_proportional_scale 0.0\npi_proportional_exponent

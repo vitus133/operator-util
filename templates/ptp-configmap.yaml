@@ -1,7 +1,7 @@
 apiVersion: v1
 data:
   cnfdf12: '[{"name":"oc-1","interface":"ens1f0","phc2sysOpts":"-a
-    -r -m -n 24 --step_threshold 2.0",
+    -r -m -n 24 --step_threshold 2.0","ptpSchedulingPolicy":"SCHED_FIFO","ptpSchedulingPriority":32,
     "ptp4lOpts":"-2 -s", "ptp4lConf":"[global]\n#\n# Default Data Set\n#\ntwoStepFlag 1\nslaveOnly
     0\npriority1 128\npriority2 128\ndomainNumber 24\n#utc_offset 37\nclockClass 255\nclockAccuracy
     0xFE\noffsetScaledLogVariance 0xFFFF\nfree_running 0\nfreq_est_interval 1\ndscp_event
