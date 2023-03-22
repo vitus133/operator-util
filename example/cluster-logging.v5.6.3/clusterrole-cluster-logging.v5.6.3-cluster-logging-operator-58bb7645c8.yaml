@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
     creationTimestamp: null
-    name: cluster-logging.5.5.4-cluster-logging-operator-564b457fbf
+    name: cluster-logging.v5.6.3-cluster-logging-operator-58bb7645c8
 rules:
     - apiGroups:
         - console.openshift.io
@@ -40,6 +40,8 @@ rules:
     - apiGroups:
         - config.openshift.io
       resources:
+        - apiservers
+        - clusterversions
         - proxies
         - infrastructures
       verbs:
@@ -51,7 +53,7 @@ rules:
       resources:
         - securitycontextconstraints
       verbs:
-        - create
+        - '*'
     - apiGroups:
         - ""
       resources:

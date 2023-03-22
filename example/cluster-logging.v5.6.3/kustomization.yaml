@@ -1,16 +1,14 @@
 resources:
     - namespace-openshift-logging.yaml
     - serviceaccount-cluster-logging-operator.yaml
-    - role-cluster-logging.5.5.4-cluster-logging-operator-58cd59778b.yaml
-    - rolebinding-cluster-logging.5.5.4-cluster-logging-operator-58cd59778b.yaml
-    - clusterrole-cluster-logging.5.5.4-cluster-logging-operator-564b457fbf.yaml
-    - clusterrolebinding-cluster-logging.5.5.4-cluster-logging-operator-564b457fbf.yaml
+    - role-cluster-logging.v5.6.3-cluster-logging-operator-8998dc6b4.yaml
+    - rolebinding-cluster-logging.v5.6.3-cluster-logging-operator-8998dc6b4.yaml
+    - clusterrole-cluster-logging.v5.6.3-cluster-logging-operator-58bb7645c8.yaml
+    - clusterrolebinding-cluster-logging.v5.6.3-cluster-logging-operator-58bb7645c8.yaml
     - customresourcedefinition-clusterlogforwarders.logging.openshift.io.yaml
     - customresourcedefinition-clusterloggings.logging.openshift.io.yaml
-    - clusterrolebinding-cluster-logging-metadata-reader.yaml
     - servicemonitor-cluster-logging-operator-metrics-monitor.yaml
     - service-cluster-logging-operator-metrics.yaml
-    - priorityclass-cluster-logging.yaml
     - rolebinding-log-collector-privileged-binding.yaml
     - role-log-collector-privileged.yaml
     - clusterrole-metadata-reader.yaml

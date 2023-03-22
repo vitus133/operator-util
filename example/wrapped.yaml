@@ -2948,7 +2948,7 @@ spec:
             kind: Role
             metadata:
               creationTimestamp: null
-              name: cluster-logging.5.5.4-cluster-logging-operator-58cd59778b
+              name: cluster-logging.v5.6.3-cluster-logging-operator-8998dc6b4
               namespace: openshift-logging
             rules:
             - apiGroups:
@@ -3023,12 +3023,12 @@ spec:
             kind: RoleBinding
             metadata:
               creationTimestamp: null
-              name: cluster-logging.5.5.4-cluster-logging-operator-58cd59778b
+              name: cluster-logging.v5.6.3-cluster-logging-operator-8998dc6b4
               namespace: openshift-logging
             roleRef:
               apiGroup: rbac.authorization.k8s.io
               kind: Role
-              name: cluster-logging.5.5.4-cluster-logging-operator-58cd59778b
+              name: cluster-logging.v5.6.3-cluster-logging-operator-8998dc6b4
             subjects:
             - kind: ServiceAccount
               name: cluster-logging-operator
@@ -3039,7 +3039,7 @@ spec:
             kind: ClusterRole
             metadata:
               creationTimestamp: null
-              name: cluster-logging.5.5.4-cluster-logging-operator-564b457fbf
+              name: cluster-logging.v5.6.3-cluster-logging-operator-58bb7645c8
             rules:
             - apiGroups:
               - console.openshift.io
@@ -3077,6 +3077,8 @@ spec:
             - apiGroups:
               - config.openshift.io
               resources:
+              - apiservers
+              - clusterversions
               - proxies
               - infrastructures
               verbs:
@@ -3088,7 +3090,7 @@ spec:
               resources:
               - securitycontextconstraints
               verbs:
-              - create
+              - '*'
             - apiGroups:
               - ""
               resources:
@@ -3106,11 +3108,11 @@ spec:
             kind: ClusterRoleBinding
             metadata:
               creationTimestamp: null
-              name: cluster-logging.5.5.4-cluster-logging-operator-564b457fbf
+              name: cluster-logging.v5.6.3-cluster-logging-operator-58bb7645c8
             roleRef:
               apiGroup: rbac.authorization.k8s.io
               kind: ClusterRole
-              name: cluster-logging.5.5.4-cluster-logging-operator-564b457fbf
+              name: cluster-logging.v5.6.3-cluster-logging-operator-58bb7645c8
             subjects:
             - kind: ServiceAccount
               name: cluster-logging-operator
@@ -3171,8 +3173,7 @@ spec:
                             type: string
                         type: object
                       spec:
-                        description: ClusterLogForwarderSpec defines how logs should
-                          be forwarded to remote targets.
+                        description: Specification of the desired behavior of ClusterLogForwarder
                         properties:
                           inputs:
                             description: "Inputs are named filters for log messages
@@ -3184,8 +3185,9 @@ spec:
                               description: InputSpec defines a selector of log messages.
                               properties:
                                 application:
-                                  description: Application, if present, enables `application`
-                                    logs.
+                                  description: Application, if present, enables named
+                                    set of `application` logs that can specify a set
+                                    of match criteria
                                   properties:
                                     namespaces:
                                       description: Namespaces from which to collect
@@ -3201,43 +3203,6 @@ spec:
                                         these labels are collected. If absent or empty,
                                         logs are collected regardless of labels.
                                       properties:
-                                        matchExpressions:
-                                          description: matchExpressions is a list
-                                            of label selector requirements. The requirements
-                                            are ANDed.
-                                          items:
-                                            description: A label selector requirement
-                                              is a selector that contains values,
-                                              a key, and an operator that relates
-                                              the key and values.
-                                            properties:
-                                              key:
-                                                description: key is the label key
-                                                  that the selector applies to.
-                                                type: string
-                                              operator:
-                                                description: operator represents a
-                                                  key's relationship to a set of values.
-                                                  Valid operators are In, NotIn, Exists
-                                                  and DoesNotExist.
-                                                type: string
-                                              values:
-                                                description: values is an array of
-                                                  string values. If the operator is
-                                                  In or NotIn, the values array must
-                                                  be non-empty. If the operator is
-                                                  Exists or DoesNotExist, the values
-                                                  array must be empty. This array
-                                                  is replaced during a strategic merge
-                                                  patch.
-                                                items:
-                                                  type: string
-                                                type: array
-                                            required:
-                                            - key
-                                            - operator
-                                            type: object
-                                          type: array
                                         matchLabels:
                                           additionalProperties:
                                             type: string
@@ -3267,8 +3232,14 @@ spec:
                               type: object
                             type: array
                           outputDefaults:
-                            description: OutputDefaults are used to specify default
-                              values for OutputSpec
+                            description: 'DEPRECATED OutputDefaults specify forwarder
+                              config explicitly for the default managed log store
+                              named ''default''.  If there is a need to spec the managed
+                              logstore, define an outputSpec like the following where
+                              the managed fields (e.g. URL, Secret.Name) will be replaced
+                              with the required values: spec: - outputs: - name: default
+                              type: elasticsearch elasticsearch: structuredTypeKey:
+                              kubernetes.labels.myvalue'
                             properties:
                               elasticsearch:
                                 description: "Elasticsearch OutputSpec default values
@@ -3354,6 +3325,13 @@ spec:
                                       description: StructuredTypeName specifies the
                                         name of elasticsearch schema
                                       type: string
+                                    version:
+                                      description: 'Version specifies the version
+                                        of Elasticsearch to be used. Must be one of:
+                                        - 6 - Default for internal ES store - 7 -
+                                        8 - Latest for external ES store'
+                                      minimum: 6
+                                      type: integer
                                   type: object
                                 fluentdForward:
                                   description: "FluentdForward does not provide additional
@@ -3438,7 +3416,7 @@ spec:
                                 secret:
                                   description: "Secret for authentication. \n Names
                                     a secret in the same namespace as the ClusterLogForwarder.
-                                    \n Sensitive authentication information is stored
+                                    Sensitive authentication information is stored
                                     in a separate Secret object. A Secret is like
                                     a ConfigMap, where the keys are strings and the
                                     values are base64-encoded binary data, for example
@@ -3448,29 +3426,30 @@ spec:
                                     field. All secret keys are optional, enable the
                                     security features you want by setting the relevant
                                     keys. \n Transport Layer Security (TLS) \n Using
-                                    a TLS URL ('https://...' or 'tls://...') without
+                                    a TLS URL (`https://...` or `tls://...`) without
                                     any secret enables basic TLS: client authenticates
                                     server using system default certificate authority.
                                     \n Additional TLS features are enabled by referencing
                                     a Secret with the following optional fields in
                                     its spec.data. All data fields are base64 encoded.
-                                    \n `tls.crt`: A client certificate, for mutual
-                                    authentication. Requires `tls.key`. `tls.key`:
+                                    \n * `tls.crt`: A client certificate, for mutual
+                                    authentication. Requires `tls.key`. * `tls.key`:
                                     Private key to unlock the client certificate.
-                                    Requires `tls.crt` `passphrase`: Passphrase to
-                                    decode an encoded TLS private key. Requires tls.key.
-                                    `ca-bundle.crt`: Custom CA to validate certificates.
-                                    \n Username and Password \n `username`: Authentication
-                                    user name. Requires `password`. `password`: Authentication
-                                    password. Requires `username`. \n Simple Authentication
-                                    Security Layer (SASL) \n `sasl.enable`: (boolean)
-                                    Explicitly enable or disable SASL. If missing,
-                                    SASL is automatically enabled if any `sasl.*`
-                                    keys are set. `sasl.mechanisms`: (array of string)
-                                    List of allowed SASL mechanism names. If missing
-                                    or empty, the system defaults are used. `sasl.allow-insecure`:
-                                    (boolean) Allow mechanisms that send clear-text
-                                    passwords. Default false."
+                                    Requires `tls.crt` * `passphrase`: Passphrase
+                                    to decode an encoded TLS private key. Requires
+                                    tls.key. * `ca-bundle.crt`: Custom CA to validate
+                                    certificates. \n Username and Password \n * `username`:
+                                    Authentication user name. Requires `password`.
+                                    * `password`: Authentication password. Requires
+                                    `username`. \n Simple Authentication Security
+                                    Layer (SASL) \n * `sasl.enable`: (boolean) Explicitly
+                                    enable or disable SASL. If missing, SASL is automatically
+                                    enabled if any `sasl.*` keys are set. * `sasl.mechanisms`:
+                                    (array of string) List of allowed SASL mechanism
+                                    names. If missing or empty, the system defaults
+                                    are used. * `sasl.allow-insecure`: (boolean) Allow
+                                    mechanisms that send clear-text passwords. Default
+                                    false."
                                   properties:
                                     name:
                                       description: Name of a secret in the namespace
@@ -3478,6 +3457,20 @@ spec:
                                       type: string
                                   required:
                                   - name
+                                  type: object
+                                splunk:
+                                  description: 'Splunk Deliver log data to Splunk’s
+                                    HTTP Event Collector Provides optional extra properties
+                                    for `type: splunk_hec` (''splunk_hec_logs'' after
+                                    Vector 0.23'
+                                  properties:
+                                    fields:
+                                      description: Fields to be added to Splunk index.
+                                        https://docs.splunk.com/Documentation/Splunk/8.0.0/Data/IFXandHEC
+                                        Should be a valid JSON object
+                                      items:
+                                        type: string
+                                      type: array
                                   type: object
                                 syslog:
                                   description: Syslog provides optional extra properties
@@ -3574,6 +3567,7 @@ spec:
                                   - cloudwatch
                                   - loki
                                   - googleCloudLogging
+                                  - splunk
                                   type: string
                                 url:
                                   description: "URL to send log records to. \n An
@@ -3598,6 +3592,8 @@ spec:
                             description: Pipelines forward the messages selected by
                               a set of inputs to a set of outputs.
                             items:
+                              description: PipelinesSpec link a set of inputs to a
+                                set of outputs.
                               properties:
                                 detectMultilineErrors:
                                   description: DetectMultilineErrors enables multiline
@@ -3648,8 +3644,7 @@ spec:
                             type: array
                         type: object
                       status:
-                        description: ClusterLogForwarderStatus defines the observed
-                          state of ClusterLogForwarder
+                        description: Status of the ClusterLogForwarder
                         properties:
                           conditions:
                             description: Conditions of the log forwarder.
@@ -3904,8 +3899,7 @@ spec:
                             type: string
                         type: object
                       spec:
-                        description: ClusterLoggingSpec defines the desired state
-                          of ClusterLogging
+                        description: Specification of the desired behavior of ClusterLogging
                         properties:
                           collection:
                             description: Specification of the Collection component
@@ -4490,8 +4484,6 @@ spec:
                                               value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                             type: object
                                         type: object
-                                    required:
-                                    - resources
                                     type: object
                                   redundancyPolicy:
                                     description: The policy towards data redundancy
@@ -4599,8 +4591,6 @@ spec:
                                           type: string
                                       type: object
                                     type: array
-                                required:
-                                - nodeCount
                                 type: object
                               lokistack:
                                 description: "LokiStack contains information about
@@ -4826,8 +4816,6 @@ spec:
                                               value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                             type: object
                                         type: object
-                                    required:
-                                    - resources
                                     type: object
                                   replicas:
                                     description: Number of instances to deploy for
@@ -4923,8 +4911,7 @@ spec:
                             type: object
                         type: object
                       status:
-                        description: ClusterLoggingStatus defines the observed state
-                          of ClusterLogging
+                        description: Status defines the observed state of ClusterLogging
                         properties:
                           collection:
                             properties:
@@ -5334,22 +5321,6 @@ spec:
                   status: {}
         - complianceType: musthave
           objectDefinition:
-            apiVersion: rbac.authorization.k8s.io/v1
-            kind: ClusterRoleBinding
-            metadata:
-              creationTimestamp: null
-              name: cluster-logging-metadata-reader
-              namespace: openshift-logging
-            roleRef:
-              apiGroup: rbac.authorization.k8s.io
-              kind: ClusterRole
-              name: metadata-reader
-            subjects:
-            - kind: ServiceAccount
-              name: logcollector
-              namespace: openshift-logging
-        - complianceType: musthave
-          objectDefinition:
             apiVersion: monitoring.coreos.com/v1
             kind: ServiceMonitor
             metadata:
@@ -5384,17 +5355,6 @@ spec:
                 name: cluster-logging-operator
               sessionAffinity: None
               type: ClusterIP
-        - complianceType: musthave
-          objectDefinition:
-            apiVersion: scheduling.k8s.io/v1
-            description: This priority class is for the Cluster-Logging Collector
-            globalDefault: false
-            kind: PriorityClass
-            metadata:
-              name: cluster-logging
-              namespace: openshift-logging
-            preemptionPolicy: PreemptLowerPriority
-            value: 1000000
         - complianceType: musthave
           objectDefinition:
             apiVersion: rbac.authorization.k8s.io/v1
@@ -5441,6 +5401,7 @@ spec:
               resources:
               - pods
               - namespaces
+              - nodes
               verbs:
               - get
               - list
@@ -5582,12 +5543,12 @@ spec:
                 categories: OpenShift Optional, Logging & Tracing
                 certified: "false"
                 console.openshift.io/plugins: '["logging-view-plugin"]'
-                containerImage: registry.redhat.io/openshift-logging/cluster-logging-rhel8-operator@sha256:c2de02159e827023b92188e8a29bc82e8dff55f51f2e5e50c159a55fcb981de2
+                containerImage: registry.redhat.io/openshift-logging/cluster-logging-rhel8-operator@sha256:a8831cd43ff166a938f7ddfc81562e5d44f556f634e84ef11d2429e57279c9c0
                 createdAt: "2018-08-01T08:00:00Z"
                 description: The Red Hat OpenShift Logging Operator for OCP provides
                   a means for configuring and managing your aggregated logging stack.
                 kubectl.kubernetes.io/default-container: cluster-logging-operator
-                olm.skipRange: '>=4.6.0-0 <5.5.4'
+                olm.skipRange: '>=4.6.0-0 <5.6.3'
                 olm.targetNamespaces: openshift-logging
                 operatorframework.io/cluster-monitoring: "true"
                 operatorframework.io/suggested-namespace: openshift-logging
@@ -5631,14 +5592,14 @@ spec:
                     - name: OPERATOR_NAME
                       value: cluster-logging-operator
                     - name: RELATED_IMAGE_VECTOR
-                      value: registry.redhat.io/openshift-logging/vector-rhel8@sha256:0001cef8ce03715daa1c0785839d80edf9d9f306dbc4cd58499ccdb84b370b7a
+                      value: registry.redhat.io/openshift-logging/vector-rhel8@sha256:eaa919745da8281aadd7044586590a98729e1b997ebd55e24c45cf2d90b75f23
                     - name: RELATED_IMAGE_FLUENTD
-                      value: registry.redhat.io/openshift-logging/fluentd-rhel8@sha256:842077788b4434800127d63b4cd5d8cfaa1cfd3ca1dfd8439de30c6e8ebda884
+                      value: registry.redhat.io/openshift-logging/fluentd-rhel8@sha256:792f9f148cf39092a406638ba3c6cc2b46cb4bc81e171338dafbb8b05dfa362f
                     - name: RELATED_IMAGE_LOG_FILE_METRIC_EXPORTER
-                      value: registry.redhat.io/openshift-logging/log-file-metric-exporter-rhel8@sha256:4e850fced9cc85ff23cb60ec8628f581b32f36313714a205c67c9a088a1b4f74
+                      value: registry.redhat.io/openshift-logging/log-file-metric-exporter-rhel8@sha256:4cdf11ec57f20c3d74ebd6ff33abd8807a67ef0e9da5b5f818a786b7aca191e2
                     - name: RELATED_IMAGE_LOGGING_CONSOLE_PLUGIN
-                      value: registry.redhat.io/openshift-logging/logging-view-plugin-rhel8@sha256:b95bca9112fceed32464de1a7e19a245e511ce4858088213261c559149d4d3e2
-                    image: registry.redhat.io/openshift-logging/cluster-logging-rhel8-operator@sha256:c2de02159e827023b92188e8a29bc82e8dff55f51f2e5e50c159a55fcb981de2
+                      value: registry.redhat.io/openshift-logging/logging-view-plugin-rhel8@sha256:0dc61c30a084f157b2075cadcb1b56db421e1ada6c1fbf2a6394824e9fd167d8
+                    image: registry.redhat.io/openshift-logging/cluster-logging-rhel8-operator@sha256:a8831cd43ff166a938f7ddfc81562e5d44f556f634e84ef11d2429e57279c9c0
                     imagePullPolicy: IfNotPresent
                     name: cluster-logging-operator
                     resources: {}

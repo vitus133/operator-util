@@ -2,13 +2,12 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
     creationTimestamp: null
-    name: cluster-logging-metadata-reader
-    namespace: openshift-logging
+    name: cluster-logging.v5.6.3-cluster-logging-operator-58bb7645c8
 roleRef:
     apiGroup: rbac.authorization.k8s.io
     kind: ClusterRole
-    name: metadata-reader
+    name: cluster-logging.v5.6.3-cluster-logging-operator-58bb7645c8
 subjects:
     - kind: ServiceAccount
-      name: logcollector
+      name: cluster-logging-operator
       namespace: openshift-logging

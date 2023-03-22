@@ -113,6 +113,7 @@ func convertBundle(args []string) {
 	}
 
 	for _, obj := range objects {
+
 		yamlData, err = yaml.Marshal(obj)
 		if err != nil {
 			log.Fatal(err)
@@ -126,6 +127,9 @@ func convertBundle(args []string) {
 			log.Fatal(err)
 		}
 		delete(temp, "status")
+		if obj.GetName() == "priorityclass" {
+			delete(temp["metadata"].(map[string]interface{}), "namespace")
+		}
 		yamlData, err = yamlv3.Marshal(temp)
 		if err != nil {
 			log.Fatal(err)
