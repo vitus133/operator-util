@@ -118,12 +118,12 @@ Following items must be done manually:
 ```bash
 $ go run main.go convert --input /tmp/tmp.zkGHjiFvTP --override-namespace openshift-ptp
 ```
-2. The PTP configuration is done through a [configmap](templates/ptp-configmap.yaml). The data key must be equal to the node name (`cnfdf12` in this example). Change it manually befor running the conversion command
-3. The daemonset template is currently hardcoded in [templates/ptp-daemon.yaml](templates/ptp-daemon.yaml) and not loadeed from ptp-operator image
+2. The PTP configuration is done through a [configmap](templates/ptp-configmap.yaml). The data key must be equal to the node name (`cnfdf12` in this example). Change it manually before running the conversion command
+3. The daemonset template is currently hardcoded in [templates/ptp-daemon.yaml](templates/ptp-daemon.yaml) and not loaded from ptp-operator image
 
 
 ## Plans
-1. research how to handle ApiServiceDefinitions and WebhookDefinition - WIP
+1. research how to handle ApiServiceDefinitions and WebhookDefinition - cancelled
 1. use makefile
 1. use config file so user won't need to copy temporary file names form one command to another
 1. do pulling and rendering in go, so it can be reused in TALM
