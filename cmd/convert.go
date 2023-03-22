@@ -10,9 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	render "github.com/openshift/ptp-operator/pkg/render"
 	"github.com/spf13/cobra"
 	convert "github.com/vitus133/operator-util/pkg/convert"
 	yamlv3 "gopkg.in/yaml.v3"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	yaml "sigs.k8s.io/yaml"
 )
 
@@ -46,6 +48,9 @@ func convertBundle(args []string) {
 	fsys := os.DirFS(inputPath)
 	reg := convert.RegistryV1{}
 	plain, err := convert.RegistryV1ToPlain(fsys, &reg, overrideNamespace)
+	if err != nil {
+		log.Fatal(err)
+	}
 	if outputPath == "" {
 		cwd, err := os.Getwd()
 		if err != nil {
@@ -55,12 +60,61 @@ func convertBundle(args []string) {
 		os.Mkdir(outputPath, 0755)
 	}
 	log.Println(reg.CSV.Name)
-	if err != nil {
-		log.Fatal(err)
-	}
 	kustomization := make(map[string][]string)
 	var yamlData []byte
-	for _, obj := range plain.Objects {
+	var objects []client.Object
+
+	if reg.PackageName == "ptp-operator" {
+
+		data := render.MakeRenderData()
+
+		data.Data["Namespace"] = "openshift-ptp"
+		data.Data["ReleaseVersion"] = "4.12"
+		data.Data["EnableEventPublisher"] = false
+		for _, img := range reg.CSV.Spec.RelatedImages {
+			switch img.Name {
+			case "ose-ptp":
+				data.Data["Image"] = img.Image
+			case "ose-kube-rbac-proxy":
+				data.Data["KubeRbacProxy"] = img.Image
+			case "ose-cloud-event-proxy":
+				data.Data["SideCar"] = img.Image
+			default:
+				continue
+			}
+
+		}
+
+		objs, err := render.RenderDir(filepath.Join("templates", "ptp-daemon.yaml"), &data)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, obj := range objs {
+			// yamlData, err = yaml.Marshal(obj.Object)
+			// if err != nil {
+			// 	log.Fatal(err)
+			// }
+			// _, err = writeObjToFile(obj, yamlData)
+			// if err != nil {
+			// 	log.Fatal(err)
+			// }
+			objects = append(objects, obj)
+		}
+		for _, obj := range plain.Objects {
+			switch strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind) {
+			case "namespace":
+				objects = append(objects, obj)
+			default:
+				continue
+
+			}
+
+		}
+	} else {
+		objects = plain.Objects
+	}
+
+	for _, obj := range objects {
 		yamlData, err = yaml.Marshal(obj)
 		if err != nil {
 			log.Fatal(err)
@@ -79,8 +133,9 @@ func convertBundle(args []string) {
 			log.Fatal(err)
 		}
 		// End workaround
-		fn := fmt.Sprintf("%s-%s.yaml", strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind), obj.GetName())
-		err = os.WriteFile(filepath.Join(outputPath, fn), yamlData, 0644)
+		fn, err := writeObjToFile(obj, yamlData)
+		// fn := fmt.Sprintf("%s-%s.yaml", strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind), obj.GetName())
+		// err = os.WriteFile(filepath.Join(outputPath, fn), yamlData, 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -95,4 +150,10 @@ func convertBundle(args []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+}
+
+func writeObjToFile(obj client.Object, data []byte) (string, error) {
+	fn := fmt.Sprintf("%s-%s.yaml", strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind), obj.GetName())
+	return fn, os.WriteFile(filepath.Join(outputPath, fn), data, 0644)
 }

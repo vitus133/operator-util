@@ -1,23 +1,8 @@
 resources:
-- clusterrolebinding-ptp-operator.4.12.0-202303021731-linuxptp-daemon-785744698.yaml
-- clusterrolebinding-ptp-operator.4.12.0-202303021731-ptp-operator-b84d979c4.yaml
-- clusterrole-ptp-operator.4.12.0-202303021731-linuxptp-daemon-785744698.yaml
-- clusterrole-ptp-operator.4.12.0-202303021731-ptp-operator-b84d979c4.yaml
-- configmap-manager-config.yaml
-- customresourcedefinition-nodeptpdevices.ptp.openshift.io.yaml
-- customresourcedefinition-ptpconfigs.ptp.openshift.io.yaml
-- customresourcedefinition-ptpoperatorconfigs.ptp.openshift.io.yaml
-- deployment-ptp-operator.yaml
-- namespace-openshift-ptp.yaml
-- rolebinding-ptp-operator.4.12.0-202303021731-linuxptp-daemon-549c7bc676.yaml
-- rolebinding-ptp-operator.4.12.0-202303021731-ptp-operator-9df8d7d8d.yaml
-- role-ptp-operator.4.12.0-202303021731-linuxptp-daemon-549c7bc676.yaml
-- role-ptp-operator.4.12.0-202303021731-ptp-operator-9df8d7d8d.yaml
-- serviceaccount-linuxptp-daemon.yaml
-- serviceaccount-ptp-operator.yaml
-- service-ptpconfig-validator-webhook-service.yaml
-
-
-
-
-
+    - daemonset-linuxptp-daemon.yaml
+    - servicemonitor-monitor-ptp.yaml
+    - service-ptp-monitor-service.yaml
+    - role-prometheus-k8s.yaml
+    - rolebinding-prometheus-k8s.yaml
+    - prometheusrule-ptp-rules.yaml
+    - namespace-openshift-ptp.yaml

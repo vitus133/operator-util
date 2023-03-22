@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+    labels:
+        prometheus: k8s
+        role: alert-rules
+    name: ptp-rules
+    namespace: openshift-ptp
+spec:
+    groups:
+        - name: ptp.rules
+          rules:
+            - alert: HighPtpSyncOffset
+              annotations:
+                message: |
+                    All nodes should have ptp sync offset lower then 100
+              expr: |
+                openshift_ptp_offset_ns > 100 or openshift_ptp_offset_ns < -100
+              for: 2m
+              labels:
+                severity: warning
