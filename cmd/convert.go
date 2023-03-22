@@ -85,26 +85,24 @@ func convertBundle(args []string) {
 
 		}
 
-		objs, err := render.RenderDir(filepath.Join("templates", "ptp-daemon.yaml"), &data)
+		objs, err := render.RenderDir("templates", &data)
 		if err != nil {
 			log.Fatal(err)
 		}
 		for _, obj := range objs {
-			// yamlData, err = yaml.Marshal(obj.Object)
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
-			// _, err = writeObjToFile(obj, yamlData)
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
+
 			objects = append(objects, obj)
 		}
 		for _, obj := range plain.Objects {
 			switch strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind) {
 			case "namespace":
 				objects = append(objects, obj)
+			case "serviceaccount", "clusterrole", "clusterrolebinding", "role", "rolebinding":
+				if strings.Contains(strings.ToLower(obj.GetName()), "daemon") {
+					objects = append(objects, obj)
+				}
 			default:
+				log.Println("Ignoring", obj.GetObjectKind().GroupVersionKind().Kind, obj.GetName())
 				continue
 
 			}
