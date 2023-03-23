@@ -2,11 +2,11 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   name: placement-operators
-  namespace: cnfdf12-common
+  namespace: cnfde26-common
 spec:
   clusterSelector:
     matchExpressions:
-    - key: common-cnfdf12
+    - key: common-cnfde26
       operator: In
       values:
       - "true"
@@ -15,7 +15,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   name: binding-operators
-  namespace: cnfdf12-common
+  namespace: cnfde26-common
 placementRef:
   apiGroup: apps.open-cluster-management.io
   kind: PlacementRule
@@ -34,7 +34,7 @@ metadata:
     policy.open-cluster-management.io/standards: NIST SP 800-53
     ran.openshift.io/ztp-deploy-wave: "1"
   name: operators
-  namespace: cnfdf12-common
+  namespace: cnfde26-common
 spec:
   disabled: false
   policy-templates:
@@ -1283,7 +1283,7 @@ spec:
           objectDefinition:
             apiVersion: v1
             data:
-              cnfdf12: '[{"name":"oc-1","interface":"ens1f0","phc2sysOpts":"-a -r
+              cnfde26.ptp.lab.eng.bos.redhat.com: '[{"name":"oc-1","interface":"ens1f0","phc2sysOpts":"-a -r
                 -m -n 24 --step_threshold 2.0","ptpSchedulingPolicy":"SCHED_FIFO","ptpSchedulingPriority":32,
                 "ptp4lOpts":"-2 -s", "ptp4lConf":"[global]\n#\n# Default Data Set\n#\ntwoStepFlag
                 1\nslaveOnly 0\npriority1 128\npriority2 128\ndomainNumber 24\n#utc_offset
