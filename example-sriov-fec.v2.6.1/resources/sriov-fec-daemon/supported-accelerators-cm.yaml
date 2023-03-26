@@ -1,0 +1,12 @@
+apiVersion: v1
+data:
+  accelerators.json: "{\n  \"VendorID\": {\n    \"8086\": \"Intel Corporation\",\n
+    \   \"1172\": \"Altera Corporation\"\n  },\n  \"Class\": \"12\",\n  \"SubClass\":
+    \"00\",\n  \"Devices\": {\n    \"0d8f\": \"FPGA_5GNR\",\n    \"5052\": \"FPGA_LTE\",\n
+    \   \"0d5c\": \"ACC100\",\n    \"57c0\": \"ACC200\", \n    \"0b32\": \"\"\n  },\n
+    \ \"NodeLabel\": \"fpga.intel.com/intel-accelerator-present\"\n}\n"
+immutable: false
+kind: ConfigMap
+metadata:
+  name: supported-accelerators
+  namespace: openshift-sriov-fec

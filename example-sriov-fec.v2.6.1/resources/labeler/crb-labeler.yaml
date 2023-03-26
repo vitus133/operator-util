@@ -1,0 +1,20 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: accelerator-discovery
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: accelerator-discovery
+  
+  namespace: openshift-sriov-fec
+  
+subjects:
+- kind: ServiceAccount
+  name: accelerator-discovery
+  namespace: openshift-sriov-fec
+  
+userNames:
+- system:serviceaccount:openshift-sriov-fec:accelerator-discovery
+  
+

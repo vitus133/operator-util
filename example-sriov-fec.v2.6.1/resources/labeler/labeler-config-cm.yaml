@@ -1,0 +1,89 @@
+apiVersion: v1
+data:
+  clusterRole: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: accelerator-discovery
+    rules:
+    - apiGroups: [""]
+      resources: ["nodes"]
+      verbs: ["get", "update"]
+  clusterRoleBinding: "apiVersion: rbac.authorization.k8s.io/v1\nkind: ClusterRoleBinding\nmetadata:\n
+    \ name: accelerator-discovery\nroleRef:\n  apiGroup: rbac.authorization.k8s.io\n
+    \ kind: ClusterRole\n  name: accelerator-discovery\n  \n  namespace: openshift-sriov-fec\n
+    \ \nsubjects:\n- kind: ServiceAccount\n  name: accelerator-discovery\n  namespace:
+    openshift-sriov-fec\n  \nuserNames:\n- system:serviceaccount:openshift-sriov-fec:accelerator-discovery\n
+    \ \n"
+  configMap: "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: supported-accelerators\n
+    \ namespace: openshift-sriov-fec\nimmutable: false\ndata:\n  accelerators.json:
+    |\n    {\n      \"VendorID\": {\n        \"8086\": \"Intel Corporation\",\n        \"1172\":
+    \"Altera Corporation\"\n      },\n      \"Class\": \"12\",\n      \"SubClass\":
+    \"00\",\n      \"Devices\": {\n        \"0d8f\": \"FPGA_5GNR\",\n        \"5052\":
+    \"FPGA_LTE\",\n        \"0d5c\": \"ACC100\",\n        \"57c0\": \"ACC200\", \n
+    \       \"0b32\": \"\"\n      },\n      \"NodeLabel\": \"fpga.intel.com/intel-accelerator-present\"\n
+    \   }\n"
+  daemonSet: |
+    apiVersion: apps/v1
+    kind: DaemonSet
+    metadata:
+      labels:
+        app: accelerator-discovery
+      name: accelerator-discovery
+      namespace: openshift-sriov-fec
+    spec:
+      minReadySeconds: 10
+      selector:
+        matchLabels:
+          app: accelerator-discovery
+      template:
+        metadata:
+          labels:
+            app: accelerator-discovery
+          name: accelerator-discovery
+        spec:
+          serviceAccount: accelerator-discovery
+          serviceAccountName: accelerator-discovery
+          containers:
+          - image: registry.connect.redhat.com/intel/n3000-labeler@sha256:b3d5c2ec1d50e95c5bef0d0b246afebd4969d29c70dd3497236203f232ba5706
+            imagePullPolicy: IfNotPresent
+            name: accelerator-discovery
+            securityContext:
+              readOnlyRootFilesystem: true
+            volumeMounts:
+            - name: config-volume
+              mountPath: "/labeler-workspace/config"
+              readOnly: true
+            env:
+              - name: NODENAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: spec.nodeName
+          volumes:
+            - name: config-volume
+              configMap:
+                name: supported-accelerators
+                items:
+                - key: accelerators.json
+                  path: accelerators.json
+  serviceAccount: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: accelerator-discovery
+      namespace: openshift-sriov-fec
+immutable: false
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2023-03-26T06:48:31Z"
+  name: labeler-config
+  namespace: openshift-sriov-fec
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Deployment
+    name: sriov-fec-controller-manager
+    uid: 67cda1dc-5554-4d91-972a-2d1a49f4aad7
+  resourceVersion: "284122"
+  uid: 7608b7a8-bd16-4bb0-913a-26eee02a4a9a

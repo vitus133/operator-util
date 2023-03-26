@@ -1,0 +1,9 @@
+resources:
+- crb-sriov-fec-daemon.yaml
+- cr-sriov-fec-daemon.yaml
+- ds-sriov-fec-daemon.yaml
+- role-binding-sriov-fec-daemon.yaml
+- role-sriov-fec-daemon.yaml
+- sa-sriov-fec-daemon.yaml
+- secret-vfio-token.yaml
+- supported-accelerators-cm.yaml

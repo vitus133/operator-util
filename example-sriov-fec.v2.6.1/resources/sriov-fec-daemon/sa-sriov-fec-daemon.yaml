@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sriov-fec-daemon
+  namespace: openshift-sriov-fec
+

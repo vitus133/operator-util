@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: sriov-fec-daemon
+subjects:
+- kind: ServiceAccount
+  name: sriov-fec-daemon
+  namespace: openshift-sriov-fec
+roleRef:
+  kind: ClusterRole
+  name: sriov-fec-daemon
+  apiGroup: rbac.authorization.k8s.io
+

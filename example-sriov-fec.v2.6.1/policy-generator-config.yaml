@@ -1,0 +1,22 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: fec
+policyDefaults:
+  namespace: cnfde26-common
+  policyAnnotations:
+    ran.openshift.io/ztp-deploy-wave: '1'
+  generatePolicyPlacement: true
+policies:
+  - name: fec
+    manifests:
+      - path: resources
+    remediationAction: inform
+    placement:
+      clusterSelector:
+        matchExpressions:
+          - key: common-cnfde26
+            operator: In
+            values:
+              - 'true'
+

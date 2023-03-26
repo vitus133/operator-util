@@ -1,0 +1,49 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: sriov-fec-daemon
+  namespace: openshift-sriov-fec
+rules:
+- apiGroups:
+  - sriovfec.intel.com
+  resources:
+  - sriovfecclusterconfigs
+  - sriovfecnodeconfigs
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - sriovfec.intel.com
+  resources:
+  - sriovfecclusterconfigs/status
+  - sriovfecnodeconfigs/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - security.openshift.io
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+  resourceNames:
+  - privileged
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+
