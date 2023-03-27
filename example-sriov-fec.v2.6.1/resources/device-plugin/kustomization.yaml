@@ -1,6 +1,0 @@
-resources:
-- ds-dp.yaml
-- rb-dp.yaml
-- role-dp.yaml
-- sa-dp.yaml
-- sriovdp-config-cm.yaml

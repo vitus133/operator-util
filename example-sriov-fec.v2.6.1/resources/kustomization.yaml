@@ -1,6 +1,0 @@
-resources:
-- customresourcedefinition-sriovfecclusterconfigs.sriovfec.intel.com.yaml
-- customresourcedefinition-sriovfecnodeconfigs.sriovfec.intel.com.yaml
-- namespace-openshift-sriov-fec.yaml
-- device-plugin
-- sriov-fec-daemon

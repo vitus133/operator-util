@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: accelerator-discovery
-  namespace: openshift-sriov-fec
-
