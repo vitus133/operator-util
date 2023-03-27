@@ -1,0 +1,16 @@
+resources:
+    - namespace-vran-acceleration-operators.yaml
+    - serviceaccount-controller-manager.yaml
+    - clusterrole-sriov-fec.v2.6.1-controller-manager-54676d8967.yaml
+    - clusterrole-sriov-fec.v2.6.1-controller-manager-ff478b9f.yaml
+    - clusterrolebinding-sriov-fec.v2.6.1-controller-manager-54676d8967.yaml
+    - clusterrolebinding-sriov-fec.v2.6.1-controller-manager-ff478b9f.yaml
+    - customresourcedefinition-sriovfecclusterconfigs.sriovfec.intel.com.yaml
+    - customresourcedefinition-sriovfecnodeconfigs.sriovfec.intel.com.yaml
+    - service-sriov-fec-controller-manager-metrics-service.yaml
+    - configmap-sriov-fec-manager-config.yaml
+    - clusterrole-sriov-fec-metrics-reader.yaml
+    - service-sriov-fec-webhook-service.yaml
+    - deployment-sriov-fec-controller-manager.yaml
+    # - openshift-service-ca.crt.yaml
+    # - sriov-fec-controller-manager-service-cert.yaml
