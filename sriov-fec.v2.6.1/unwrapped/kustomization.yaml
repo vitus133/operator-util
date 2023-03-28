@@ -12,5 +12,3 @@ resources:
     - clusterrole-sriov-fec-metrics-reader.yaml
     - service-sriov-fec-webhook-service.yaml
     - deployment-sriov-fec-controller-manager.yaml
-    # - openshift-service-ca.crt.yaml
-    # - sriov-fec-controller-manager-service-cert.yaml
