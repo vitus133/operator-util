@@ -1,8 +1,6 @@
 apiVersion: sriovfec.intel.com/v2
 kind: SriovFecClusterConfig
 metadata:
-  creationTimestamp: "2023-03-26T15:47:15Z"
-  generation: 1
   name: config
   namespace: vran-acceleration-operators
 spec:

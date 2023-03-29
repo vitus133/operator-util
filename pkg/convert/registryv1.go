@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
+	olm "github.com/operator-framework/operator-lifecycle-manager/pkg/controller/install"
 	registry "github.com/vitus133/operator-util/pkg/operator-registry"
 	util "github.com/vitus133/operator-util/pkg/util"
 )
@@ -173,10 +174,27 @@ func Convert(in RegistryV1, installNamespace string, targetNamespaces []string) 
 	if len(in.CSV.Spec.APIServiceDefinitions.Owned) > 0 {
 		return nil, fmt.Errorf("apiServiceDefintions are not supported")
 	}
-
+	apiServices := []unstructured.Unstructured{}
 	if len(in.CSV.Spec.WebhookDefinitions) > 0 {
-		//return nil, fmt.Errorf("webhookDefinitions are not supported")
-		log.Println("Warning: webhookDefinitions are not supported")
+		log.Println("webhook definitions will be generated")
+		for _, wh := range in.CSV.Spec.WebhookDefinitions {
+			for i := range wh.Rules {
+				name := fmt.Sprintf("%s.%s", wh.Rules[i].APIVersions[0], wh.Rules[i].APIGroups[0])
+				obj := unstructured.Unstructured{}
+				svc := map[string]interface{}{
+					"apiVersion": "apiregistration.k8s.io/v1",
+					"kind":       "APIService",
+					"metadata": map[string]interface{}{
+						"name": name,
+						"annotations": map[string]interface{}{
+							"service.beta.openshift.io/inject-cabundle": "true",
+						},
+					},
+				}
+				obj.Object = svc
+				apiServices = append(apiServices, obj)
+			}
+		}
 	}
 
 	deployments := []appsv1.Deployment{}
@@ -287,14 +305,39 @@ func Convert(in RegistryV1, installNamespace string, targetNamespaces []string) 
 	}
 	for _, obj := range in.CRDs {
 		obj := obj
+		if len(apiServices) > 0 {
+			annotations := obj.GetAnnotations()
+			if annotations == nil {
+				annotations = make(map[string]string)
+			}
+			annotations["service.beta.openshift.io/inject-cabundle"] = "true"
+			obj.SetAnnotations(annotations)
+		}
 		objs = append(objs, &obj)
 	}
+	secretName := ""
 	for _, obj := range in.Others {
 		obj := obj
 		obj.SetNamespace(installNamespace)
+		if obj.GetKind() == "Service" && strings.Contains(obj.GetName(), "webhook") && len(apiServices) > 0 {
+			secretName = obj.GetName()
+			annotations := obj.GetAnnotations()
+			if annotations == nil {
+				annotations = make(map[string]string)
+			}
+			annotations["service.beta.openshift.io/serving-cert-secret-name"] = secretName
+			obj.SetAnnotations(annotations)
+		}
 		objs = append(objs, &obj)
 	}
 	for _, obj := range deployments {
+		obj := obj
+		if secretName != "" {
+			olm.AddDefaultCertVolumeAndVolumeMounts(&obj.Spec, secretName)
+		}
+		objs = append(objs, &obj)
+	}
+	for _, obj := range apiServices {
 		obj := obj
 		objs = append(objs, &obj)
 	}

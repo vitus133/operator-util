@@ -1,0 +1,129 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    creationTimestamp: null
+    name: sriov-fec.v2.6.1-controller-manager-54676d8967
+rules:
+    - apiGroups:
+        - ""
+      resources:
+        - configmaps
+        - namespaces
+        - secrets
+        - serviceaccounts
+      verbs:
+        - create
+        - get
+        - list
+        - update
+    - apiGroups:
+        - ""
+      resources:
+        - nodes
+      verbs:
+        - get
+        - list
+        - patch
+        - update
+        - watch
+    - apiGroups:
+        - ""
+      resources:
+        - pods
+      verbs:
+        - create
+        - delete
+        - get
+        - list
+        - patch
+        - update
+        - watch
+    - apiGroups:
+        - ""
+      resources:
+        - pods/eviction
+      verbs:
+        - create
+    - apiGroups:
+        - apps
+      resources:
+        - daemonsets
+        - deployments
+        - deployments/finalizers
+      verbs:
+        - create
+        - get
+        - list
+        - update
+    - apiGroups:
+        - rbac.authorization.k8s.io
+      resources:
+        - clusterrolebindings
+        - clusterroles
+        - rolebindings
+        - roles
+      verbs:
+        - create
+        - get
+        - list
+        - update
+    - apiGroups:
+        - security.openshift.io
+      resourceNames:
+        - privileged
+      resources:
+        - securitycontextconstraints
+      verbs:
+        - use
+    - apiGroups:
+        - sriovfec.intel.com
+      resources:
+        - sriovfecclusterconfigs
+      verbs:
+        - create
+        - delete
+        - get
+        - list
+        - patch
+        - update
+        - watch
+    - apiGroups:
+        - sriovfec.intel.com
+      resources:
+        - sriovfecclusterconfigs/status
+      verbs:
+        - get
+        - patch
+        - update
+    - apiGroups:
+        - sriovfec.intel.com
+      resources:
+        - sriovfecnodeconfigs
+      verbs:
+        - create
+        - delete
+        - get
+        - list
+        - patch
+        - update
+        - watch
+    - apiGroups:
+        - sriovfec.intel.com
+      resources:
+        - sriovfecnodeconfigs/status
+      verbs:
+        - get
+        - patch
+        - update
+    - apiGroups:
+        - authentication.k8s.io
+      resources:
+        - tokenreviews
+      verbs:
+        - create
+    - apiGroups:
+        - authorization.k8s.io
+      resources:
+        - subjectaccessreviews
+      verbs:
+        - create

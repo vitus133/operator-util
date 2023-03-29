@@ -1,0 +1,6 @@
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+    annotations:
+        service.beta.openshift.io/inject-cabundle: "true"
+    name: v2.sriovfec.intel.com
