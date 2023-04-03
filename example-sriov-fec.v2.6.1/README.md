@@ -1,10 +1,10 @@
-To configure the webhook, following has been done:
+To configure the webhook, the equivalent of teh following has been done in the generator code:
 ```bash
 $ oc annotate service sriov-fec-webhook-service service.beta.openshift.io/serving-cert-secret-name=sriov-fec-webhook-service
---$ oc annotate apiservice v2.sriovfec.intel.com service.beta.openshift.io/inject-cabundle=true
+$ oc annotate apiservice v2.sriovfec.intel.com service.beta.openshift.io/inject-cabundle=true
 $ oc annotate crd sriovfecclusterconfigs.sriovfec.intel.com service.beta.openshift.io/inject-cabundle=true
 $ oc annotate crd sriovfecnodeconfigs.sriovfec.intel.com service.beta.openshift.io/inject-cabundle=true
-# oc edit cm sriov-fec-manager-config ???
+
 ```
 
 Modify the deployment by adding

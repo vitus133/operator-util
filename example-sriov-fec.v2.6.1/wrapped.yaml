@@ -2,11 +2,11 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   name: placement-fec
-  namespace: cnfde26-common
+  namespace: cnfdf01-common
 spec:
   clusterSelector:
     matchExpressions:
-    - key: common-cnfde26
+    - key: common-cnfdf01
       operator: In
       values:
       - "true"
@@ -15,7 +15,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   name: binding-fec
-  namespace: cnfde26-common
+  namespace: cnfdf01-common
 placementRef:
   apiGroup: apps.open-cluster-management.io
   kind: PlacementRule
@@ -34,7 +34,7 @@ metadata:
     policy.open-cluster-management.io/standards: NIST SP 800-53
     ran.openshift.io/ztp-deploy-wave: "1"
   name: fec
-  namespace: cnfde26-common
+  namespace: cnfdf01-common
 spec:
   disabled: false
   policy-templates:
@@ -268,6 +268,7 @@ spec:
             metadata:
               annotations:
                 controller-gen.kubebuilder.io/version: v0.9.2
+                service.beta.openshift.io/inject-cabundle: "true"
               creationTimestamp: null
               name: sriovfecclusterconfigs.sriovfec.intel.com
             spec:
@@ -1072,6 +1073,7 @@ spec:
             metadata:
               annotations:
                 controller-gen.kubebuilder.io/version: v0.9.2
+                service.beta.openshift.io/inject-cabundle: "true"
               creationTimestamp: null
               name: sriovfecnodeconfigs.sriovfec.intel.com
             spec:
@@ -2133,6 +2135,8 @@ spec:
             apiVersion: v1
             kind: Service
             metadata:
+              annotations:
+                service.beta.openshift.io/serving-cert-secret-name: sriov-fec-webhook-service
               creationTimestamp: null
               name: sriov-fec-webhook-service
               namespace: vran-acceleration-operators
@@ -2148,261 +2152,257 @@ spec:
             apiVersion: apps/v1
             kind: Deployment
             metadata:
+              annotations:
+                alm-examples: |-
+                  [
+                    {
+                      "apiVersion": "sriovfec.intel.com/v2",
+                      "kind": "SriovFecClusterConfig",
+                      "metadata": {
+                        "name": "acc100SampleConfig",
+                        "namespace": "vran-acceleration-operators"
+                      },
+                      "spec": {
+                        "acceleratorSelector": {
+                          "deviceID": "someDevice",
+                          "driver": "someDriver",
+                          "maxVirtualFunctions": 2,
+                          "pciAddress": "somePciAddress",
+                          "vendorID": "someVendor"
+                        },
+                        "drainSkip": false,
+                        "nodeSelector": {
+                          "expectedLabel1": "valueOfExpectedLabel1",
+                          "expectedLabelN": "valueOfExpectedLabelN"
+                        },
+                        "physicalFunction": {
+                          "bbDevConfig": {
+                            "acc100": {
+                              "downlink4G": {
+                                "aqDepthLog2": 4,
+                                "numAqsPerGroups": 16,
+                                "numQueueGroups": 0
+                              },
+                              "downlink5G": {
+                                "aqDepthLog2": 4,
+                                "numAqsPerGroups": 16,
+                                "numQueueGroups": 4
+                              },
+                              "maxQueueSize": 1024,
+                              "numVfBundles": 16,
+                              "pfMode": true,
+                              "uplink4G": {
+                                "aqDepthLog2": 4,
+                                "numAqsPerGroups": 16,
+                                "numQueueGroups": 0
+                              },
+                              "uplink5G": {
+                                "aqDepthLog2": 4,
+                                "numAqsPerGroups": 16,
+                                "numQueueGroups": 4
+                              }
+                            }
+                          },
+                          "pfDriver": "pci-pf-stub",
+                          "vfAmount": 2,
+                          "vfDriver": "vfio-pci"
+                        },
+                        "priority": 100
+                      }
+                    },
+                    {
+                      "apiVersion": "sriovfec.intel.com/v2",
+                      "kind": "SriovFecClusterConfig",
+                      "metadata": {
+                        "name": "n3000SampleConfig",
+                        "namespace": "vran-acceleration-operators"
+                      },
+                      "spec": {
+                        "acceleratorSelector": {
+                          "deviceID": "someDevice",
+                          "driver": "someDriver",
+                          "maxVirtualFunctions": 2,
+                          "pciAddress": "somePciAddress",
+                          "vendorID": "someVendor"
+                        },
+                        "drainSkip": false,
+                        "nodeSelector": {
+                          "expectedLabel1": "valueOfExpectedLabel1",
+                          "expectedLabelN": "valueOfExpectedLabelN"
+                        },
+                        "physicalFunction": {
+                          "bbDevConfig": {
+                            "n3000": {
+                              "downlink": {
+                                "bandwidth": 3,
+                                "loadBalance": 128,
+                                "queues": {
+                                  "vf0": 16,
+                                  "vf1": 16,
+                                  "vf2": 0,
+                                  "vf3": 0,
+                                  "vf4": 0,
+                                  "vf5": 0,
+                                  "vf6": 0,
+                                  "vf7": 0
+                                }
+                              },
+                              "flrTimeout": 610,
+                              "networkType": "FPGA_5GNR",
+                              "pfMode": true,
+                              "uplink": {
+                                "bandwidth": 3,
+                                "loadBalance": 128,
+                                "queues": {
+                                  "vf0": 16,
+                                  "vf1": 16,
+                                  "vf2": 0,
+                                  "vf3": 0,
+                                  "vf4": 0,
+                                  "vf5": 0,
+                                  "vf6": 0,
+                                  "vf7": 0
+                                }
+                              }
+                            }
+                          },
+                          "pfDriver": "pci-pf-stub",
+                          "vfAmount": 2,
+                          "vfDriver": "vfio-pci"
+                        },
+                        "priority": 100
+                      }
+                    },
+                    {
+                      "apiVersion": "sriovfec.intel.com/v2",
+                      "kind": "SriovFecNodeConfig",
+                      "metadata": {
+                        "name": "acc100-worker",
+                        "namespace": "vran-acceleration-operators"
+                      },
+                      "spec": {
+                        "drainSkip": false,
+                        "physicalFunctions": [
+                          {
+                            "bbDevConfig": {
+                              "acc100": {
+                                "downlink4G": {
+                                  "aqDepthLog2": 4,
+                                  "numAqsPerGroups": 16,
+                                  "numQueueGroups": 0
+                                },
+                                "downlink5G": {
+                                  "aqDepthLog2": 4,
+                                  "numAqsPerGroups": 16,
+                                  "numQueueGroups": 4
+                                },
+                                "maxQueueSize": 1024,
+                                "numVfBundles": 16,
+                                "pfMode": true,
+                                "uplink4G": {
+                                  "aqDepthLog2": 4,
+                                  "numAqsPerGroups": 16,
+                                  "numQueueGroups": 0
+                                },
+                                "uplink5G": {
+                                  "aqDepthLog2": 4,
+                                  "numAqsPerGroups": 16,
+                                  "numQueueGroups": 4
+                                }
+                              }
+                            },
+                            "pci_addr": "somePciAddress",
+                            "pf_driver": "pci-pf-stub",
+                            "vf_amount": 2,
+                            "vf_driver": "vfio-pci"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "apiVersion": "sriovfec.intel.com/v2",
+                      "kind": "SriovFecNodeConfig",
+                      "metadata": {
+                        "name": "n3000-worker",
+                        "namespace": "vran-acceleration-operators"
+                      },
+                      "spec": {
+                        "drainSkip": false,
+                        "physicalFunctions": [
+                          {
+                            "bbDevConfig": {
+                              "n3000": {
+                                "downlink": {
+                                  "bandwidth": 3,
+                                  "loadBalance": 128,
+                                  "queues": {
+                                    "vf0": 16,
+                                    "vf1": 16,
+                                    "vf2": 0,
+                                    "vf3": 0,
+                                    "vf4": 0,
+                                    "vf5": 0,
+                                    "vf6": 0,
+                                    "vf7": 0
+                                  }
+                                },
+                                "flrTimeout": 610,
+                                "networkType": "FPGA_5GNR",
+                                "pfMode": true,
+                                "uplink": {
+                                  "bandwidth": 3,
+                                  "loadBalance": 128,
+                                  "queues": {
+                                    "vf0": 16,
+                                    "vf1": 16,
+                                    "vf2": 0,
+                                    "vf3": 0,
+                                    "vf4": 0,
+                                    "vf5": 0,
+                                    "vf6": 0,
+                                    "vf7": 0
+                                  }
+                                }
+                              }
+                            },
+                            "pci_addr": "somePciAddress",
+                            "pf_driver": "pci-pf-stub",
+                            "vf_amount": 2,
+                            "vf_driver": "vfio-pci"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                capabilities: Basic Install
+                categories: Networking
+                containerImage: registry.connect.redhat.com/intel/sriov-fec-operator@sha256:24745819d9ce3c6cfc059252deb2612a74d9c2593e2eef38bc9ff6d62c348327
+                createdAt: "2023-01-30"
+                description: An operator for Intel Wireless FEC Accelerator to orchestrate
+                  and manage the resources/devices exposed by a range of Intel's vRAN
+                  FEC acceleration devices/hardware within the OpenShift cluster.
+                kubectl.kubernetes.io/default-container: manager
+                olm.targetNamespaces: ""
+                operators.operatorframework.io/builder: operator-sdk-v1.25.2
+                operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
+                repository: https://github.com/smart-edge-open/sriov-fec-operator
+                support: Intel Corporation
+              creationTimestamp: null
               labels:
                 control-plane: controller-manager
-                operators.coreos.com/sriov-fec.vran-acceleration-operators: ""
               name: sriov-fec-controller-manager
               namespace: vran-acceleration-operators
             spec:
-              progressDeadlineSeconds: 600
               replicas: 1
-              revisionHistoryLimit: 1
               selector:
                 matchLabels:
                   control-plane: controller-manager
-              strategy:
-                rollingUpdate:
-                  maxSurge: 25%
-                  maxUnavailable: 25%
-                type: RollingUpdate
+              strategy: {}
               template:
                 metadata:
                   annotations:
-                    alm-examples: |-
-                      [
-                        {
-                          "apiVersion": "sriovfec.intel.com/v2",
-                          "kind": "SriovFecClusterConfig",
-                          "metadata": {
-                            "name": "acc100SampleConfig",
-                            "namespace": "vran-acceleration-operators"
-                          },
-                          "spec": {
-                            "acceleratorSelector": {
-                              "deviceID": "someDevice",
-                              "driver": "someDriver",
-                              "maxVirtualFunctions": 2,
-                              "pciAddress": "somePciAddress",
-                              "vendorID": "someVendor"
-                            },
-                            "drainSkip": false,
-                            "nodeSelector": {
-                              "expectedLabel1": "valueOfExpectedLabel1",
-                              "expectedLabelN": "valueOfExpectedLabelN"
-                            },
-                            "physicalFunction": {
-                              "bbDevConfig": {
-                                "acc100": {
-                                  "downlink4G": {
-                                    "aqDepthLog2": 4,
-                                    "numAqsPerGroups": 16,
-                                    "numQueueGroups": 0
-                                  },
-                                  "downlink5G": {
-                                    "aqDepthLog2": 4,
-                                    "numAqsPerGroups": 16,
-                                    "numQueueGroups": 4
-                                  },
-                                  "maxQueueSize": 1024,
-                                  "numVfBundles": 16,
-                                  "pfMode": true,
-                                  "uplink4G": {
-                                    "aqDepthLog2": 4,
-                                    "numAqsPerGroups": 16,
-                                    "numQueueGroups": 0
-                                  },
-                                  "uplink5G": {
-                                    "aqDepthLog2": 4,
-                                    "numAqsPerGroups": 16,
-                                    "numQueueGroups": 4
-                                  }
-                                }
-                              },
-                              "pfDriver": "pci-pf-stub",
-                              "vfAmount": 2,
-                              "vfDriver": "vfio-pci"
-                            },
-                            "priority": 100
-                          }
-                        },
-                        {
-                          "apiVersion": "sriovfec.intel.com/v2",
-                          "kind": "SriovFecClusterConfig",
-                          "metadata": {
-                            "name": "n3000SampleConfig",
-                            "namespace": "vran-acceleration-operators"
-                          },
-                          "spec": {
-                            "acceleratorSelector": {
-                              "deviceID": "someDevice",
-                              "driver": "someDriver",
-                              "maxVirtualFunctions": 2,
-                              "pciAddress": "somePciAddress",
-                              "vendorID": "someVendor"
-                            },
-                            "drainSkip": false,
-                            "nodeSelector": {
-                              "expectedLabel1": "valueOfExpectedLabel1",
-                              "expectedLabelN": "valueOfExpectedLabelN"
-                            },
-                            "physicalFunction": {
-                              "bbDevConfig": {
-                                "n3000": {
-                                  "downlink": {
-                                    "bandwidth": 3,
-                                    "loadBalance": 128,
-                                    "queues": {
-                                      "vf0": 16,
-                                      "vf1": 16,
-                                      "vf2": 0,
-                                      "vf3": 0,
-                                      "vf4": 0,
-                                      "vf5": 0,
-                                      "vf6": 0,
-                                      "vf7": 0
-                                    }
-                                  },
-                                  "flrTimeout": 610,
-                                  "networkType": "FPGA_5GNR",
-                                  "pfMode": true,
-                                  "uplink": {
-                                    "bandwidth": 3,
-                                    "loadBalance": 128,
-                                    "queues": {
-                                      "vf0": 16,
-                                      "vf1": 16,
-                                      "vf2": 0,
-                                      "vf3": 0,
-                                      "vf4": 0,
-                                      "vf5": 0,
-                                      "vf6": 0,
-                                      "vf7": 0
-                                    }
-                                  }
-                                }
-                              },
-                              "pfDriver": "pci-pf-stub",
-                              "vfAmount": 2,
-                              "vfDriver": "vfio-pci"
-                            },
-                            "priority": 100
-                          }
-                        },
-                        {
-                          "apiVersion": "sriovfec.intel.com/v2",
-                          "kind": "SriovFecNodeConfig",
-                          "metadata": {
-                            "name": "acc100-worker",
-                            "namespace": "vran-acceleration-operators"
-                          },
-                          "spec": {
-                            "drainSkip": false,
-                            "physicalFunctions": [
-                              {
-                                "bbDevConfig": {
-                                  "acc100": {
-                                    "downlink4G": {
-                                      "aqDepthLog2": 4,
-                                      "numAqsPerGroups": 16,
-                                      "numQueueGroups": 0
-                                    },
-                                    "downlink5G": {
-                                      "aqDepthLog2": 4,
-                                      "numAqsPerGroups": 16,
-                                      "numQueueGroups": 4
-                                    },
-                                    "maxQueueSize": 1024,
-                                    "numVfBundles": 16,
-                                    "pfMode": true,
-                                    "uplink4G": {
-                                      "aqDepthLog2": 4,
-                                      "numAqsPerGroups": 16,
-                                      "numQueueGroups": 0
-                                    },
-                                    "uplink5G": {
-                                      "aqDepthLog2": 4,
-                                      "numAqsPerGroups": 16,
-                                      "numQueueGroups": 4
-                                    }
-                                  }
-                                },
-                                "pci_addr": "somePciAddress",
-                                "pf_driver": "pci-pf-stub",
-                                "vf_amount": 2,
-                                "vf_driver": "vfio-pci"
-                              }
-                            ]
-                          }
-                        },
-                        {
-                          "apiVersion": "sriovfec.intel.com/v2",
-                          "kind": "SriovFecNodeConfig",
-                          "metadata": {
-                            "name": "n3000-worker",
-                            "namespace": "vran-acceleration-operators"
-                          },
-                          "spec": {
-                            "drainSkip": false,
-                            "physicalFunctions": [
-                              {
-                                "bbDevConfig": {
-                                  "n3000": {
-                                    "downlink": {
-                                      "bandwidth": 3,
-                                      "loadBalance": 128,
-                                      "queues": {
-                                        "vf0": 16,
-                                        "vf1": 16,
-                                        "vf2": 0,
-                                        "vf3": 0,
-                                        "vf4": 0,
-                                        "vf5": 0,
-                                        "vf6": 0,
-                                        "vf7": 0
-                                      }
-                                    },
-                                    "flrTimeout": 610,
-                                    "networkType": "FPGA_5GNR",
-                                    "pfMode": true,
-                                    "uplink": {
-                                      "bandwidth": 3,
-                                      "loadBalance": 128,
-                                      "queues": {
-                                        "vf0": 16,
-                                        "vf1": 16,
-                                        "vf2": 0,
-                                        "vf3": 0,
-                                        "vf4": 0,
-                                        "vf5": 0,
-                                        "vf6": 0,
-                                        "vf7": 0
-                                      }
-                                    }
-                                  }
-                                },
-                                "pci_addr": "somePciAddress",
-                                "pf_driver": "pci-pf-stub",
-                                "vf_amount": 2,
-                                "vf_driver": "vfio-pci"
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    capabilities: Basic Install
-                    categories: Networking
-                    containerImage: registry.connect.redhat.com/intel/sriov-fec-operator@sha256:24745819d9ce3c6cfc059252deb2612a74d9c2593e2eef38bc9ff6d62c348327
-                    createdAt: "2023-01-30"
-                    description: An operator for Intel Wireless FEC Accelerator to
-                      orchestrate and manage the resources/devices exposed by a range
-                      of Intel's vRAN FEC acceleration devices/hardware within the
-                      OpenShift cluster.
                     kubectl.kubernetes.io/default-container: manager
-                    operatorframework.io/properties: '{"properties":[{"type":"olm.gvk","value":{"group":"sriovfec.intel.com","kind":"SriovFecClusterConfig","version":"v1"}},{"type":"olm.gvk","value":{"group":"sriovfec.intel.com","kind":"SriovFecClusterConfig","version":"v2"}},{"type":"olm.gvk","value":{"group":"sriovfec.intel.com","kind":"SriovFecNodeConfig","version":"v1"}},{"type":"olm.gvk","value":{"group":"sriovfec.intel.com","kind":"SriovFecNodeConfig","version":"v2"}},{"type":"olm.package","value":{"packageName":"sriov-fec","version":"2.6.1"}}]}'
-                    operators.operatorframework.io/builder: operator-sdk-v1.25.2
-                    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
-                    repository: https://github.com/smart-edge-open/sriov-fec-operator
-                    support: Intel Corporation
+                  creationTimestamp: null
                   labels:
                     control-plane: controller-manager
                 spec:
@@ -2412,11 +2412,7 @@ spec:
                     - --upstream=http://127.0.0.1:8080/
                     - --logtostderr=true
                     - --v=0
-                    env:
-                    - name: OPERATOR_CONDITION_NAME
-                      value: sriov-fec.v2.6.1
                     image: registry.redhat.io/openshift4/ose-kube-rbac-proxy@sha256:e3dad360d0351237a16593ca0862652809c41a2127c2f98b9e0a559568efbd10
-                    imagePullPolicy: IfNotPresent
                     name: kube-rbac-proxy
                     ports:
                     - containerPort: 8443
@@ -2432,8 +2428,6 @@ spec:
                     securityContext:
                       allowPrivilegeEscalation: false
                       runAsNonRoot: true
-                    terminationMessagePath: /dev/termination-log
-                    terminationMessagePolicy: File
                     volumeMounts:
                     - mountPath: /apiserver.local.config/certificates
                       name: apiservice-cert
@@ -2455,38 +2449,25 @@ spec:
                     - name: SRIOV_FEC_NAMESPACE
                       valueFrom:
                         fieldRef:
-                          apiVersion: v1
                           fieldPath: metadata.namespace
                     - name: NAME
                       valueFrom:
                         fieldRef:
-                          apiVersion: v1
                           fieldPath: metadata.name
-                    - name: OPERATOR_CONDITION_NAME
-                      value: sriov-fec.v2.6.1
                     image: registry.connect.redhat.com/intel/sriov-fec-operator@sha256:24745819d9ce3c6cfc059252deb2612a74d9c2593e2eef38bc9ff6d62c348327
-                    imagePullPolicy: IfNotPresent
                     livenessProbe:
-                      failureThreshold: 3
                       httpGet:
                         path: /healthz
                         port: 8081
-                        scheme: HTTP
                       initialDelaySeconds: 15
                       periodSeconds: 20
-                      successThreshold: 1
-                      timeoutSeconds: 1
                     name: manager
                     readinessProbe:
-                      failureThreshold: 3
                       httpGet:
                         path: /readyz
                         port: 8081
-                        scheme: HTTP
                       initialDelaySeconds: 5
                       periodSeconds: 10
-                      successThreshold: 1
-                      timeoutSeconds: 1
                     resources:
                       limits:
                         cpu: 200m
@@ -2498,18 +2479,11 @@ spec:
                       allowPrivilegeEscalation: false
                       readOnlyRootFilesystem: true
                       runAsNonRoot: true
-                    terminationMessagePath: /dev/termination-log
-                    terminationMessagePolicy: File
                     volumeMounts:
                     - mountPath: /apiserver.local.config/certificates
                       name: apiservice-cert
                     - mountPath: /tmp/k8s-webhook-server/serving-certs
                       name: webhook-cert
-                  dnsPolicy: ClusterFirst
-                  restartPolicy: Always
-                  schedulerName: default-scheduler
-                  securityContext: {}
-                  serviceAccount: controller-manager
                   serviceAccountName: controller-manager
                   terminationGracePeriodSeconds: 10
                   topologySpreadConstraints:
@@ -2522,7 +2496,6 @@ spec:
                   volumes:
                   - name: apiservice-cert
                     secret:
-                      defaultMode: 420
                       items:
                       - key: tls.crt
                         path: apiserver.crt
@@ -2531,13 +2504,20 @@ spec:
                       secretName: sriov-fec-webhook-service
                   - name: webhook-cert
                     secret:
-                      defaultMode: 420
                       items:
                       - key: tls.crt
                         path: tls.crt
                       - key: tls.key
                         path: tls.key
                       secretName: sriov-fec-webhook-service
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apiregistration.k8s.io/v1
+            kind: APIService
+            metadata:
+              annotations:
+                service.beta.openshift.io/inject-cabundle: "true"
+              name: v2.sriovfec.intel.com
         remediationAction: inform
         severity: low
   remediationAction: inform

@@ -3,7 +3,7 @@ kind: PolicyGenerator
 metadata:
   name: fec
 policyDefaults:
-  namespace: cnfde26-common
+  namespace: cnfdf01-common
   policyAnnotations:
     ran.openshift.io/ztp-deploy-wave: '1'
   generatePolicyPlacement: true
@@ -15,7 +15,7 @@ policies:
     placement:
       clusterSelector:
         matchExpressions:
-          - key: common-cnfde26
+          - key: common-cnfdf01
             operator: In
             values:
               - 'true'
