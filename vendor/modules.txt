@@ -106,7 +106,7 @@ github.com/munnerz/goautoneg
 # github.com/openshift/ptp-operator v0.0.0-20230321141741-960b3e3acc51
 ## explicit; go 1.18
 github.com/openshift/ptp-operator/pkg/render
-# github.com/operator-framework/api v0.17.3
+# github.com/operator-framework/api v0.17.4-0.20230223191600-0131a6301e42
 ## explicit; go 1.19
 github.com/operator-framework/api/pkg/lib/version
 github.com/operator-framework/api/pkg/operators
@@ -223,6 +223,8 @@ google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
+# gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
+## explicit; go 1.11
 # gopkg.in/inf.v0 v0.9.1
 ## explicit
 gopkg.in/inf.v0
