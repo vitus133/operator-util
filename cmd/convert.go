@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -18,21 +20,45 @@ import (
 	yaml "sigs.k8s.io/yaml"
 )
 
+type PackageSpec struct {
+	Name    string `json:"name"`
+	Channel string `json:"channel"`
+	// +optional
+	Namespace string `json:"namespace,omitempty"`
+}
+
+type Catalog struct {
+	Catalog      string        `json:"catalog"`
+	RenderedPath string        `json:"renderedPath"`
+	Packages     []PackageSpec `json:"packages"`
+}
+type Policy struct {
+	Name             string   `json:"name"`
+	Namespace        string   `json:"namespace"`
+	IncludedPackages []string `json:"includedPackages"`
+}
+type ConversionSpec struct {
+	Operators []Catalog `json:"operators"`
+	// +optional
+	Policies []Policy `json:"policies"`
+}
+
 var wrap bool
 var inputPath string
 var outputPath string
 var overrideNamespace string
+var specFile string
 
 // convertCmd represents the convert command
 var convertCmd = &cobra.Command{
 	Use:   "convert",
-	Short: "OLM bundle convert",
-	Long: `Renders an OLM bundle into a set of Kubernetes manifests
+	Short: "OLM schema convert",
+	Long: `Renders an OLM bundle(s) into a set of Kubernetes manifests
 that can be directly installed on clusters.
 The manifests can optionally be wrapped in a policy for application through 
 Advanced Cluster Management`,
 	Run: func(cmd *cobra.Command, args []string) {
-		convertBundle(args)
+		convertMain(args)
 	},
 }
 
@@ -42,6 +68,81 @@ func init() {
 	convertCmd.PersistentFlags().StringVar(&inputPath, "input", "", "Path to the bundle image file system")
 	convertCmd.PersistentFlags().StringVar(&outputPath, "output", "", "Path to the directory for output files (if omitted, a directory will be created at cwd)")
 	convertCmd.PersistentFlags().StringVar(&overrideNamespace, "override-namespace", "", "Override default target namespace")
+	convertCmd.PersistentFlags().StringVar(&specFile, "spec-file", "", "Path to conversion specification file")
+}
+
+func renderCatalogs(catalogs []Catalog) error {
+	for _, item := range catalogs {
+		temp := strings.Split(item.Catalog, "/")
+		fn := fmt.Sprint(strings.Split(temp[len(temp)-1], ":")[0], ".json")
+		info, err := os.Stat(filepath.Join(item.RenderedPath, fn))
+		if err == nil && !info.IsDir() {
+			log.Printf("rendered catalog %s is found for %s", fn, item.Catalog)
+			continue
+		}
+
+		info, err = os.Stat(item.RenderedPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				parentDir := path.Dir(item.RenderedPath)
+				baseInfo, err := os.Stat(parentDir)
+				if err != nil {
+					return fmt.Errorf("RenderedPath is not valid for %s: %s", item.Catalog, err)
+				}
+				if !baseInfo.IsDir() {
+					return fmt.Errorf("RenderedPath is not valid for %s: %s is not a directory", item.Catalog, parentDir)
+				}
+				if err = os.Mkdir(item.RenderedPath, os.FileMode(0755)); err != nil {
+					return err
+				}
+
+			}
+		} else if !info.IsDir() {
+			return fmt.Errorf("RenderedPath is not valid for %s: %s is not a directory", item.Catalog, item.RenderedPath)
+		}
+		log.Print("rendering ", item.Catalog, " and writing output to ", fn)
+
+		cmdline := fmt.Sprint("opm render ", item.Catalog)
+		cm := exec.Command("bash", "-c", cmdline)
+		out, err := cm.Output()
+
+		if err != nil {
+			return err
+		}
+
+		err = os.WriteFile(filepath.Join(item.RenderedPath, fn), out, os.FileMode(0644))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func processConversionSpec(args []string) error {
+	var spec ConversionSpec
+	f, err := os.ReadFile(specFile)
+	if err != nil {
+		return err
+	}
+	if err := yaml.Unmarshal(f, &spec); err != nil {
+		return err
+	}
+	if err := renderCatalogs(spec.Operators); err != nil {
+		return err
+	}
+	return nil
+}
+
+func convertMain(args []string) {
+	if specFile != "" {
+		err := processConversionSpec(args)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	} else {
+		convertBundle(args)
+	}
 }
 
 func convertBundle(args []string) {

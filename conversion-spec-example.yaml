@@ -1,0 +1,44 @@
+operators:
+- catalog: registry.redhat.io/redhat/redhat-operator-index:v4.12
+  renderedPath: rendered
+  packages:
+  - name: ptp-operator
+    channel: stable
+    namespace: openshift-ptp
+  - name: cluster-logging
+    channel: stable
+    bundle: latest
+  - name: local-storage
+    channel: stable
+  - name: sriov-network-operator
+    channel: stable
+- catalog: registry.redhat.io/redhat/certified-operator-index:v4.12
+  renderedPath: rendered
+  packages:
+  - name: sriov-fec
+    channel: stable
+    namespace: vran-acceleration-operators
+policies:
+- name: fec
+  namespace: cnfdf01-common
+  policyAnnotations:
+    ran.openshift.io/ztp-deploy-wave: '1'
+  includedPackages:
+  - sriov-fec
+- name: operators
+  namespace: cnfdf01-common
+  policyAnnotations:
+    ran.openshift.io/ztp-deploy-wave: '1'
+  includedPackages:
+  - openshift-ptp
+  - local-storage
+  - cluster-logging
+  - sriov-network-operator
+placement:
+  clusterSelector:
+    matchExpressions:
+      - key: common-cnfdf01
+        operator: In
+        values:
+          - 'true'
+  
