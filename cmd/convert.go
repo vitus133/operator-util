@@ -4,7 +4,9 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -43,6 +45,19 @@ type ConversionSpec struct {
 	Policies []Policy `json:"policies"`
 }
 
+type OlmChannelEntry struct {
+	Name      string   `yaml:"name"`
+	SkipRange string   `yaml:"skipRange,omitempty"`
+	Skips     []string `yaml:"skips,omitempty"`
+}
+type OlmObject struct {
+	Schema  string            `yaml:"schema"`
+	Name    string            `yaml:"name"`
+	Package string            `yaml:"package,omitempty"`
+	Image   string            `yaml:"image,omitempty"`
+	Entries []OlmChannelEntry `yaml:"entries,omitempty"`
+}
+
 var wrap bool
 var inputPath string
 var outputPath string
@@ -74,7 +89,7 @@ func init() {
 func renderCatalogs(catalogs []Catalog) error {
 	for _, item := range catalogs {
 		temp := strings.Split(item.Catalog, "/")
-		fn := fmt.Sprint(strings.Split(temp[len(temp)-1], ":")[0], ".json")
+		fn := fmt.Sprint(strings.Split(temp[len(temp)-1], ":")[0], ".yaml")
 		info, err := os.Stat(filepath.Join(item.RenderedPath, fn))
 		if err == nil && !info.IsDir() {
 			log.Printf("rendered catalog %s is found for %s", fn, item.Catalog)
@@ -102,7 +117,7 @@ func renderCatalogs(catalogs []Catalog) error {
 		}
 		log.Print("rendering ", item.Catalog, " and writing output to ", fn)
 
-		cmdline := fmt.Sprint("opm render ", item.Catalog)
+		cmdline := fmt.Sprintf("opm render %s -o yaml", item.Catalog)
 		cm := exec.Command("bash", "-c", cmdline)
 		out, err := cm.Output()
 
@@ -115,7 +130,61 @@ func renderCatalogs(catalogs []Catalog) error {
 			return err
 		}
 	}
+
+	for _, item := range catalogs {
+		temp := strings.Split(item.Catalog, "/")
+		fn := fmt.Sprint(strings.Split(temp[len(temp)-1], ":")[0], ".yaml")
+		f, err := os.ReadFile(filepath.Join(item.RenderedPath, fn))
+		if err != nil {
+			return err
+		}
+		catalog := []OlmObject{}
+
+		if err := UnmarshalAllOlmObjects([]byte(f), &catalog); err != nil {
+			log.Fatal(err)
+		}
+		var pkg []string
+		var channel []string
+		for _, operator := range item.Packages {
+			pkg = append(pkg, operator.Name)
+			channel = append(channel, operator.Channel)
+		}
+		fmt.Println(pkg)
+		fmt.Println(channel)
+
+		bundles := make([]string, len(pkg))
+		bundleImages := make([]string, len(pkg))
+
+		for _, olmObject := range catalog {
+			switch olmObject.Schema {
+			case "olm.channel":
+				idx := ListIndex(pkg, olmObject.Package)
+				// fmt.Println(olmObject.Package, olmObject.Name, idx)
+				if idx >= 0 && strings.Contains(olmObject.Name, channel[idx]) {
+					fmt.Println(idx, "found")
+					bundles[idx] = olmObject.Entries[len(olmObject.Entries)-1].Name
+				}
+			case "olm.bundle":
+				bundleIdx := ListIndex(bundles, olmObject.Name)
+				if bundleIdx >= 0 {
+					bundleImages[bundleIdx] = olmObject.Image
+				}
+			}
+
+		}
+		fmt.Println(bundleImages, bundles)
+	}
+
 	return nil
+}
+
+func ListIndex(lst []string, sub string) int {
+	for i, item := range lst {
+		if item == sub {
+			return i
+		}
+	}
+	return -1
 }
 
 func processConversionSpec(args []string) error {
@@ -259,4 +328,22 @@ func convertBundle(args []string) {
 func writeObjToFile(obj client.Object, data []byte) (string, error) {
 	fn := fmt.Sprintf("%s-%s.yaml", strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind), obj.GetName())
 	return fn, os.WriteFile(filepath.Join(outputPath, fn), data, 0644)
+}
+
+func UnmarshalAllOlmObjects(in []byte, out *[]OlmObject) error {
+	r := bytes.NewReader(in)
+	decoder := yamlv3.NewDecoder(r)
+	for {
+		var bo OlmObject
+
+		if err := decoder.Decode(&bo); err != nil {
+			// Break when there are no more documents to decode
+			if err != io.EOF {
+				return err
+			}
+			break
+		}
+		*out = append(*out, bo)
+	}
+	return nil
 }

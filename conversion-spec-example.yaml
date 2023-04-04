@@ -2,13 +2,13 @@ operators:
 - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.12
   renderedPath: rendered
   packages:
-  - name: ptp-operator
-    channel: stable
-    namespace: openshift-ptp
+
   - name: cluster-logging
     channel: stable
-    bundle: latest
-  - name: local-storage
+  - name: ptp-operator
+    channel: stable
+    namespace: openshift-ptp    
+  - name: local-storage-operator
     channel: stable
   - name: sriov-network-operator
     channel: stable
