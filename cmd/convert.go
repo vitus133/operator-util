@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -161,7 +162,6 @@ func renderCatalogs(catalogs []Catalog) error {
 				idx := ListIndex(pkg, olmObject.Package)
 				// fmt.Println(olmObject.Package, olmObject.Name, idx)
 				if idx >= 0 && strings.Contains(olmObject.Name, channel[idx]) {
-					fmt.Println(idx, "found")
 					bundles[idx] = olmObject.Entries[len(olmObject.Entries)-1].Name
 				}
 			case "olm.bundle":
@@ -172,9 +172,41 @@ func renderCatalogs(catalogs []Catalog) error {
 			}
 
 		}
-		fmt.Println(bundleImages, bundles)
+		for i, bundle := range bundles {
+			err := pullBundle(bundleImages[i], bundle)
+			if err != nil {
+				return err
+			}
+			os.Exit(0)
+
+		}
 	}
 
+	return nil
+}
+
+func pullBundle(pull string, bundle string) error {
+	log.Printf("Downloading bundle %s", bundle)
+	bundleDir := fmt.Sprintf("bundle-%s", bundle)
+	if err := os.Mkdir(bundleDir, 0755); err != nil {
+		if !errors.Is(err, os.ErrExist) {
+			return err
+		}
+	}
+	cmdline := fmt.Sprintf("/usr/bin/podman pull -q %s", pull)
+	cm := exec.Command("bash", "-c", cmdline)
+	out, err := cm.Output()
+	if err != nil {
+		return err
+	}
+	id := string(out)
+	log.Println(id)
+	cmdline = fmt.Sprintf("mount=$(podman unshare podman image mount %s); podman unshare cp -rf $mount/manifests $mount/metadata %s/; podman unshare podman image unmount %s", id, bundleDir, id)
+	cm = exec.Command("bash", "-c", cmdline)
+	_, err = cm.Output()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
