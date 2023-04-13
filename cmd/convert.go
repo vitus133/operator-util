@@ -146,12 +146,16 @@ func renderCatalogs(catalogs []Catalog) error {
 		}
 		var pkg []string
 		var channel []string
+		var namespace []string
 		for _, operator := range item.Packages {
 			pkg = append(pkg, operator.Name)
 			channel = append(channel, operator.Channel)
+			namespace = append(namespace, operator.Namespace)
+
 		}
 		fmt.Println(pkg)
 		fmt.Println(channel)
+		fmt.Println(namespace)
 
 		bundles := make([]string, len(pkg))
 		bundleImages := make([]string, len(pkg))
@@ -160,7 +164,6 @@ func renderCatalogs(catalogs []Catalog) error {
 			switch olmObject.Schema {
 			case "olm.channel":
 				idx := ListIndex(pkg, olmObject.Package)
-				// fmt.Println(olmObject.Package, olmObject.Name, idx)
 				if idx >= 0 && strings.Contains(olmObject.Name, channel[idx]) {
 					bundles[idx] = olmObject.Entries[len(olmObject.Entries)-1].Name
 				}
@@ -170,34 +173,34 @@ func renderCatalogs(catalogs []Catalog) error {
 					bundleImages[bundleIdx] = olmObject.Image
 				}
 			}
-
 		}
 		for i, bundle := range bundles {
-			err := pullBundle(bundleImages[i], bundle)
+			bundleDir, err := pullBundle(bundleImages[i], bundle)
 			if err != nil {
 				return err
 			}
-			os.Exit(0)
-
+			inputPath = bundleDir
+			overrideNamespace = namespace[i]
+			convertBundle([]string{})
 		}
 	}
 
 	return nil
 }
 
-func pullBundle(pull string, bundle string) error {
+func pullBundle(pull string, bundle string) (string, error) {
 	log.Printf("Downloading bundle %s", bundle)
 	bundleDir := fmt.Sprintf("bundle-%s", bundle)
 	if err := os.Mkdir(bundleDir, 0755); err != nil {
 		if !errors.Is(err, os.ErrExist) {
-			return err
+			return "", err
 		}
 	}
 	cmdline := fmt.Sprintf("/usr/bin/podman pull -q %s", pull)
 	cm := exec.Command("bash", "-c", cmdline)
 	out, err := cm.Output()
 	if err != nil {
-		return err
+		return "", err
 	}
 	id := string(out)
 	log.Println(id)
@@ -205,9 +208,9 @@ func pullBundle(pull string, bundle string) error {
 	cm = exec.Command("bash", "-c", cmdline)
 	_, err = cm.Output()
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return bundleDir, nil
 }
 
 func ListIndex(lst []string, sub string) int {
