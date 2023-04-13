@@ -181,6 +181,7 @@ func renderCatalogs(catalogs []Catalog) error {
 			}
 			inputPath = bundleDir
 			overrideNamespace = namespace[i]
+			outputPath = ""
 			convertBundle([]string{})
 		}
 	}
@@ -264,7 +265,7 @@ func convertBundle(args []string) {
 		outputPath = filepath.Join(cwd, reg.CSV.Name)
 		os.Mkdir(outputPath, 0755)
 	}
-	log.Println(reg.CSV.Name)
+	log.Println(outputPath)
 	kustomization := make(map[string][]string)
 	var yamlData []byte
 	var objects []client.Object
