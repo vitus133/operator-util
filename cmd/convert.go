@@ -64,20 +64,18 @@ type OlmObject struct {
 	Entries []OlmChannelEntry `yaml:"entries,omitempty"`
 }
 
-var wrap bool
 var inputPath string
 var outputPath string
 var overrideNamespace string
-var specFile string
+
+// var specFile string
 
 // convertCmd represents the convert command
 var convertCmd = &cobra.Command{
 	Use:   "convert",
 	Short: "OLM schema convert",
 	Long: `Renders an OLM bundle(s) into a set of Kubernetes manifests
-that can be directly installed on clusters.
-The manifests can optionally be wrapped in a policy for application through 
-Advanced Cluster Management`,
+that can be directly installed on clusters.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		convertMain(args)
 	},
@@ -85,11 +83,10 @@ Advanced Cluster Management`,
 
 func init() {
 	rootCmd.AddCommand(convertCmd)
-	convertCmd.PersistentFlags().BoolVar(&wrap, "wrap", false, "Wrap in ACM policy (default is false)")
 	convertCmd.PersistentFlags().StringVar(&inputPath, "input", "", "Path to the bundle image file system")
 	convertCmd.PersistentFlags().StringVar(&outputPath, "output", "", "Path to the directory for output files (if omitted, a directory will be created at cwd)")
 	convertCmd.PersistentFlags().StringVar(&overrideNamespace, "override-namespace", "", "Override default target namespace")
-	convertCmd.PersistentFlags().StringVar(&specFile, "spec-file", "", "Path to conversion specification file")
+
 }
 
 func makeCleanDir(path string) error {
@@ -172,12 +169,12 @@ func processCatalogs(spec ConversionSpec) error {
 		for _, olmObject := range catalog {
 			switch olmObject.Schema {
 			case "olm.channel":
-				idx := ListIndex(pkg, olmObject.Package)
+				idx := listIndex(pkg, olmObject.Package)
 				if idx >= 0 && strings.Contains(olmObject.Name, channel[idx]) {
 					bundles[idx] = olmObject.Entries[len(olmObject.Entries)-1].Name
 				}
 			case "olm.bundle":
-				bundleIdx := ListIndex(bundles, olmObject.Name)
+				bundleIdx := listIndex(bundles, olmObject.Name)
 				if bundleIdx >= 0 {
 					bundleImages[bundleIdx] = olmObject.Image
 				}
@@ -226,7 +223,7 @@ func pullBundle(pull string, bundle string, path string) (string, error) {
 	return bundleDir, nil
 }
 
-func ListIndex(lst []string, sub string) int {
+func listIndex(lst []string, sub string) int {
 	for i, item := range lst {
 		if item == sub {
 			return i

@@ -10,6 +10,7 @@ import (
 )
 
 // var cfgFile string
+var specFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -29,6 +30,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVar(&specFile, "spec-file", "", "Path to conversion specification file")
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.operator-util.yaml)")
 }
 
