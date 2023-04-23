@@ -11,7 +11,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -31,17 +30,23 @@ type PackageSpec struct {
 }
 
 type Catalog struct {
-	Catalog      string        `json:"catalog"`
-	RenderedPath string        `json:"renderedPath"`
-	Packages     []PackageSpec `json:"packages"`
+	Catalog  string        `json:"catalog"`
+	Packages []PackageSpec `json:"packages"`
 }
 type Policy struct {
 	Name             string   `json:"name"`
 	Namespace        string   `json:"namespace"`
 	IncludedPackages []string `json:"includedPackages"`
 }
+
+type Artifacts struct {
+	RenderedCatalogsPath string `json:"renderedCatalogsPath"`
+	ExtractedBundlesPath string `json:"extractedBundlesPath"`
+	OutputPath           string `jsoon:"outputPath"`
+}
 type ConversionSpec struct {
 	Operators []Catalog `json:"operators"`
+	Artifacts Artifacts `json:"artifacts"`
 	// +optional
 	Policies []Policy `json:"policies"`
 }
@@ -87,34 +92,38 @@ func init() {
 	convertCmd.PersistentFlags().StringVar(&specFile, "spec-file", "", "Path to conversion specification file")
 }
 
-func renderCatalogs(catalogs []Catalog) error {
-	for _, item := range catalogs {
+func makeCleanDir(path string) error {
+
+	err := os.RemoveAll(path)
+	if err != nil {
+		return err
+	}
+	return os.MkdirAll(path, os.FileMode(0755))
+}
+
+func renderCatalogs(spec ConversionSpec) error {
+	err := makeCleanDir(spec.Artifacts.ExtractedBundlesPath)
+	if err != nil {
+		return err
+	}
+	err = makeCleanDir(spec.Artifacts.OutputPath)
+	if err != nil {
+		return err
+	}
+	_, err = os.Stat(spec.Artifacts.RenderedCatalogsPath)
+	if err != nil && os.IsNotExist(err) {
+		err = makeCleanDir(spec.Artifacts.RenderedCatalogsPath)
+		if err != nil {
+			return err
+		}
+	}
+	for _, item := range spec.Operators {
 		temp := strings.Split(item.Catalog, "/")
 		fn := fmt.Sprint(strings.Split(temp[len(temp)-1], ":")[0], ".yaml")
-		info, err := os.Stat(filepath.Join(item.RenderedPath, fn))
+		info, err := os.Stat(filepath.Join(spec.Artifacts.RenderedCatalogsPath, fn))
 		if err == nil && !info.IsDir() {
 			log.Printf("rendered catalog %s is found for %s", fn, item.Catalog)
 			continue
-		}
-
-		info, err = os.Stat(item.RenderedPath)
-		if err != nil {
-			if os.IsNotExist(err) {
-				parentDir := path.Dir(item.RenderedPath)
-				baseInfo, err := os.Stat(parentDir)
-				if err != nil {
-					return fmt.Errorf("RenderedPath is not valid for %s: %s", item.Catalog, err)
-				}
-				if !baseInfo.IsDir() {
-					return fmt.Errorf("RenderedPath is not valid for %s: %s is not a directory", item.Catalog, parentDir)
-				}
-				if err = os.Mkdir(item.RenderedPath, os.FileMode(0755)); err != nil {
-					return err
-				}
-
-			}
-		} else if !info.IsDir() {
-			return fmt.Errorf("RenderedPath is not valid for %s: %s is not a directory", item.Catalog, item.RenderedPath)
 		}
 		log.Print("rendering ", item.Catalog, " and writing output to ", fn)
 
@@ -125,17 +134,21 @@ func renderCatalogs(catalogs []Catalog) error {
 		if err != nil {
 			return err
 		}
-
-		err = os.WriteFile(filepath.Join(item.RenderedPath, fn), out, os.FileMode(0644))
+		err = os.WriteFile(filepath.Join(spec.Artifacts.RenderedCatalogsPath, fn), out, os.FileMode(0644))
 		if err != nil {
 			return err
 		}
-	}
 
-	for _, item := range catalogs {
+	}
+	return nil
+}
+
+func processCatalogs(spec ConversionSpec) error {
+
+	for _, item := range spec.Operators {
 		temp := strings.Split(item.Catalog, "/")
 		fn := fmt.Sprint(strings.Split(temp[len(temp)-1], ":")[0], ".yaml")
-		f, err := os.ReadFile(filepath.Join(item.RenderedPath, fn))
+		f, err := os.ReadFile(filepath.Join(spec.Artifacts.RenderedCatalogsPath, fn))
 		if err != nil {
 			return err
 		}
@@ -153,10 +166,6 @@ func renderCatalogs(catalogs []Catalog) error {
 			namespace = append(namespace, operator.Namespace)
 
 		}
-		fmt.Println(pkg)
-		fmt.Println(channel)
-		fmt.Println(namespace)
-
 		bundles := make([]string, len(pkg))
 		bundleImages := make([]string, len(pkg))
 
@@ -175,23 +184,26 @@ func renderCatalogs(catalogs []Catalog) error {
 			}
 		}
 		for i, bundle := range bundles {
-			bundleDir, err := pullBundle(bundleImages[i], bundle)
+			bundleDir, err := pullBundle(bundleImages[i], bundle, spec.Artifacts.ExtractedBundlesPath)
 			if err != nil {
 				return err
 			}
 			inputPath = bundleDir
 			overrideNamespace = namespace[i]
-			outputPath = ""
+			outputPath = filepath.Join(spec.Artifacts.OutputPath, bundle)
+			err = makeCleanDir(outputPath)
+			if err != nil {
+				return err
+			}
 			convertBundle([]string{})
 		}
 	}
-
 	return nil
 }
 
-func pullBundle(pull string, bundle string) (string, error) {
+func pullBundle(pull string, bundle string, path string) (string, error) {
 	log.Printf("Downloading bundle %s", bundle)
-	bundleDir := fmt.Sprintf("bundle-%s", bundle)
+	bundleDir := filepath.Join(path, bundle)
 	if err := os.Mkdir(bundleDir, 0755); err != nil {
 		if !errors.Is(err, os.ErrExist) {
 			return "", err
@@ -232,7 +244,10 @@ func processConversionSpec(args []string) error {
 	if err := yaml.Unmarshal(f, &spec); err != nil {
 		return err
 	}
-	if err := renderCatalogs(spec.Operators); err != nil {
+	if err := renderCatalogs(spec); err != nil {
+		return err
+	}
+	if err := processCatalogs(spec); err != nil {
 		return err
 	}
 	return nil

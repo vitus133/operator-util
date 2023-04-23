@@ -1,8 +1,10 @@
+artifacts:
+  renderedCatalogsPath: rendered
+  extractedBundlesPath: bundles
+  outputPath: output
 operators:
 - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.12
-  renderedPath: rendered
   packages:
-
   - name: cluster-logging
     channel: stable
   - name: ptp-operator
@@ -13,11 +15,11 @@ operators:
   - name: sriov-network-operator
     channel: stable
 - catalog: registry.redhat.io/redhat/certified-operator-index:v4.12
-  renderedPath: rendered
   packages:
   - name: sriov-fec
     channel: stable
     namespace: vran-acceleration-operators
+# Not yet supported
 policies:
 - name: fec
   namespace: cnfdf01-common
