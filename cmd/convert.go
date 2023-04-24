@@ -34,11 +34,21 @@ type Catalog struct {
 	Packages []PackageSpec `json:"packages"`
 }
 type Policy struct {
-	Name             string   `json:"name"`
-	Namespace        string   `json:"namespace"`
-	IncludedPackages []string `json:"includedPackages"`
+	Name              string            `json:"name"`
+	Namespace         string            `json:"namespace"`
+	IncludedPackages  []string          `json:"includedPackages"`
+	PolicyAnnotations map[string]string `json:"policyAnnotations"`
 }
-
+type PlacementConfig struct {
+	ClusterSelectors  map[string]interface{} `json:"clusterSelectors,omitempty" yaml:"clusterSelectors,omitempty"`
+	ClusterSelector   map[string]interface{} `json:"clusterSelector,omitempty" yaml:"clusterSelector,omitempty"`
+	LabelSelector     map[string]interface{} `json:"labelSelector,omitempty" yaml:"labelSelector,omitempty"`
+	Name              string                 `json:"name,omitempty" yaml:"name,omitempty"`
+	PlacementPath     string                 `json:"placementPath,omitempty" yaml:"placementPath,omitempty"`
+	PlacementRulePath string                 `json:"placementRulePath,omitempty" yaml:"placementRulePath,omitempty"`
+	PlacementName     string                 `json:"placementName,omitempty" yaml:"placementName,omitempty"`
+	PlacementRuleName string                 `json:"placementRuleName,omitempty" yaml:"placementRuleName,omitempty"`
+}
 type ArtifactsStruct struct {
 	RenderedCatalogsPath string `json:"renderedCatalogsPath"`
 	ExtractedBundlesPath string `json:"extractedBundlesPath"`
@@ -48,7 +58,8 @@ type ConversionSpec struct {
 	Operators []Catalog       `json:"operators"`
 	Artifacts ArtifactsStruct `json:"artifacts"`
 	// +optional
-	Policies []Policy `json:"policies"`
+	Policies  []Policy        `json:"policies,omitempty"`
+	Placement PlacementConfig `json:"placement,omitempty"`
 }
 
 type OlmChannelEntry struct {
@@ -298,7 +309,7 @@ func convertBundle(args []string) {
 
 		}
 
-		objs, err := render.RenderDir("templates", &data)
+		objs, err := render.RenderTemplate("templates/ptp-daemon.yaml", &data)
 		if err != nil {
 			log.Fatal(err)
 		}
