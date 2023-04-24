@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 	yaml "sigs.k8s.io/yaml"
@@ -57,6 +59,25 @@ func wrapInPolicies() error {
 	_, err = os.Stat(spec.Artifacts.OutputPath)
 	if err != nil && os.IsNotExist(err) {
 		return fmt.Errorf("there is nothing to wrap: %s: %s", spec.Artifacts.OutputPath, err)
+	}
+	for _, policy := range spec.Policies {
+		policyPath := filepath.Join(spec.Artifacts.OutputPath, "policies", policy.Name)
+		err = makeCleanDir(policyPath)
+		if err != nil {
+			return fmt.Errorf("failed to create policy path: %s: %s", policyPath, err)
+		}
+		for _, packageName := range policy.IncludedPackages {
+			entries, err := os.ReadDir(spec.Artifacts.OutputPath)
+			if err != nil {
+				return err
+			}
+			for _, entry := range entries {
+				if strings.Contains(entry.Name(), packageName) {
+					log.Println(entry.Name())
+				}
+			}
+		}
+
 	}
 	return nil
 }

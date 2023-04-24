@@ -32,15 +32,15 @@ policies:
   policyAnnotations:
     ran.openshift.io/ztp-deploy-wave: '1'
   includedPackages:
-  - openshift-ptp
-  - local-storage
+  - ptp-operator
+  - local-storage-operator
   - cluster-logging
   - sriov-network-operator
-# placement:
-#   clusterSelector:
-#     matchExpressions:
-#       - key: common-cnfdf01
-#         operator: In
-#         values:
-#           - 'true'
+placement:
+  clusterSelector:
+    matchExpressions:
+      - key: common-cnfdf01
+        operator: In
+        values:
+          - 'true'
   
