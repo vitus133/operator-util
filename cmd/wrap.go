@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -23,44 +24,23 @@ type PolicyGenConfig struct {
 	PolicyDefaults PolicyDefaults `json:"policyDefaults,omitempty" yaml:"policyDefaults,omitempty"`
 	Policies       []PolicyConfig `json:"policies" yaml:"policies"`
 }
-type ConfigurationPolicyOptions struct {
-	RemediationAction      string `json:"remediationAction,omitempty" yaml:"remediationAction,omitempty"`
-	Severity               string `json:"severity,omitempty" yaml:"severity,omitempty"`
-	ComplianceType         string `json:"complianceType,omitempty" yaml:"complianceType,omitempty"`
-	MetadataComplianceType string `json:"metadataComplianceType,omitempty" yaml:"metadataComplianceType,omitempty"`
-}
 
 type Manifest struct {
-	ConfigurationPolicyOptions `json:",inline" yaml:",inline"`
-	Patches                    []map[string]interface{} `json:"patches,omitempty" yaml:"patches,omitempty"`
-	Path                       string                   `json:"path,omitempty" yaml:"path,omitempty"`
-	IgnorePending              bool                     `json:"ignorePending,omitempty" yaml:"ignorePending,omitempty"`
+	Path string `json:"path,omitempty" yaml:"path,omitempty"`
 }
-
-// PolicyConfig represents a policy entry in the PolicyGenerator configuration.
 type PolicyConfig struct {
-	PolicyOptions              `json:",inline" yaml:",inline"`
-	ConfigurationPolicyOptions `json:",inline" yaml:",inline"`
-	Name                       string `json:"name,omitempty" yaml:"name,omitempty"`
-	// This a slice of structs to allow additional configuration related to a manifest such as
-	// accepting patches.
-	Manifests []Manifest `json:"manifests,omitempty" yaml:"manifests,omitempty"`
+	PolicyOptions `json:",inline" yaml:",inline"`
+	Name          string     `json:"name,omitempty" yaml:"name,omitempty"`
+	Manifests     []Manifest `json:"manifests,omitempty" yaml:"manifests,omitempty"`
 }
 
 type PolicyDefaults struct {
-	PolicyOptions              `json:",inline" yaml:",inline"`
-	ConfigurationPolicyOptions `json:",inline" yaml:",inline"`
-	Namespace                  string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
-	OrderPolicies              bool   `json:"orderPolicies,omitempty" yaml:"orderPolicies,omitempty"`
+	PolicyOptions `json:",inline" yaml:",inline"`
+	Namespace     string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
 }
 type PolicyOptions struct {
-	Categories                     []string          `json:"categories,omitempty" yaml:"categories,omitempty"`
-	Controls                       []string          `json:"controls,omitempty" yaml:"controls,omitempty"`
-	CopyPolicyMetadata             bool              `json:"copyPolicyMetadata,omitempty" yaml:"copyPolicyMetadata,omitempty"`
-	Placement                      PlacementConfig   `json:"placement,omitempty" yaml:"placement,omitempty"`
-	Standards                      []string          `json:"standards,omitempty" yaml:"standards,omitempty"`
-	PolicyAnnotations              map[string]string `json:"policyAnnotations,omitempty" yaml:"policyAnnotations,omitempty"`
-	ConfigurationPolicyAnnotations map[string]string `json:"configurationPolicyAnnotations,omitempty" yaml:"configurationPolicyAnnotations,omitempty"`
+	Placement         PlacementConfig   `json:"placement,omitempty" yaml:"placement,omitempty"`
+	PolicyAnnotations map[string]string `json:"policyAnnotations,omitempty" yaml:"policyAnnotations,omitempty"`
 }
 
 // wrapCmd represents the wrap command
@@ -135,26 +115,53 @@ func wrapInPolicies() error {
 		if err != nil {
 			return fmt.Errorf("failed to create policy path: %s: %s", policyPath, err)
 		}
+
 		for _, packageName := range policy.IncludedPackages {
 			entries, err := os.ReadDir(spec.Artifacts.OutputPath)
 			if err != nil {
-				return err
+				return fmt.Errorf("can't read unwrapped manifests directory: %s", err)
 			}
 			for _, entry := range entries {
 				if strings.Contains(entry.Name(), packageName) {
-					log.Println(entry.Name())
 					polConfig.Manifests = append(polConfig.Manifests, Manifest{
 						Path: entry.Name(),
 					})
+					err = os.Rename(filepath.Join(spec.Artifacts.OutputPath, entry.Name()),
+						filepath.Join(policyPath, entry.Name()))
+					if err != nil {
+						return fmt.Errorf("can't move manifests to under policy: %s, %s, %s",
+							spec.Artifacts.OutputPath, entry.Name(), err)
+					}
 				}
 			}
 		}
 		pc.Policies = append(pc.Policies, polConfig)
 		yamlData, err := yaml.Marshal(pc)
 		if err != nil {
-			return err
+			return fmt.Errorf("can't marshal %v, %s", pc, err)
 		}
-		fmt.Println(string(yamlData))
+		err = os.WriteFile(filepath.Join(policyPath, "policy-generator-config.yaml"), yamlData, 0644)
+		if err != nil {
+			return fmt.Errorf("can't write policy generator config: %s", err)
+		}
+		bytesRead, err := os.ReadFile(filepath.Join("templates", "kustomization.yaml"))
+		if err != nil {
+			return fmt.Errorf("can't write kustomization template: %s", err)
+		}
+		err = os.WriteFile(filepath.Join(policyPath, "kustomization.yaml"), bytesRead, 0644)
+		if err != nil {
+			return fmt.Errorf("can't write kustomization yaml: %s", err)
+		}
+		cmdline := fmt.Sprintf("kustomize build --enable-alpha-plugins %s", policyPath)
+		cm := exec.Command("bash", "-c", cmdline)
+		out, err := cm.Output()
+		if err != nil {
+			return fmt.Errorf("kustomize run error: %s", err)
+		}
+		err = os.WriteFile(filepath.Join(policyPath, "wrapped.yaml"), out, os.FileMode(0644))
+		if err != nil {
+			return fmt.Errorf("wrapped policy write error: %s", err)
+		}
 	}
 	return nil
 }
