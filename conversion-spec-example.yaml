@@ -36,11 +36,11 @@ policies:
   - local-storage
   - cluster-logging
   - sriov-network-operator
-placement:
-  clusterSelector:
-    matchExpressions:
-      - key: common-cnfdf01
-        operator: In
-        values:
-          - 'true'
+# placement:
+#   clusterSelector:
+#     matchExpressions:
+#       - key: common-cnfdf01
+#         operator: In
+#         values:
+#           - 'true'
   

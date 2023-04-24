@@ -39,14 +39,14 @@ type Policy struct {
 	IncludedPackages []string `json:"includedPackages"`
 }
 
-type Artifacts struct {
+type ArtifactsStruct struct {
 	RenderedCatalogsPath string `json:"renderedCatalogsPath"`
 	ExtractedBundlesPath string `json:"extractedBundlesPath"`
 	OutputPath           string `jsoon:"outputPath"`
 }
 type ConversionSpec struct {
-	Operators []Catalog `json:"operators"`
-	Artifacts Artifacts `json:"artifacts"`
+	Operators []Catalog       `json:"operators"`
+	Artifacts ArtifactsStruct `json:"artifacts"`
 	// +optional
 	Policies []Policy `json:"policies"`
 }
@@ -141,7 +141,6 @@ func renderCatalogs(spec ConversionSpec) error {
 }
 
 func processCatalogs(spec ConversionSpec) error {
-
 	for _, item := range spec.Operators {
 		temp := strings.Split(item.Catalog, "/")
 		fn := fmt.Sprint(strings.Split(temp[len(temp)-1], ":")[0], ".yaml")
@@ -233,12 +232,8 @@ func listIndex(lst []string, sub string) int {
 }
 
 func processConversionSpec(args []string) error {
-	var spec ConversionSpec
-	f, err := os.ReadFile(specFile)
+	spec, err := parseSpec(specFile)
 	if err != nil {
-		return err
-	}
-	if err := yaml.Unmarshal(f, &spec); err != nil {
 		return err
 	}
 	if err := renderCatalogs(spec); err != nil {
