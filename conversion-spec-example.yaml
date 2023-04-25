@@ -19,7 +19,6 @@ operators:
   - name: sriov-fec
     channel: stable
     namespace: vran-acceleration-operators
-# Not yet supported
 policies:
 - name: fec
   namespace: cnfdf01-common
@@ -43,4 +42,3 @@ placement:
         operator: In
         values:
           - 'true'
-  

@@ -8,7 +8,116 @@ Tools for extracting and converting OLM schema
 - kustomize (for wrapping in policies)
 - [ACM policy generator plugin](https://github.com/stolostron/policy-generator-plugin) (for wrapping in policies)
 ## Use cases
-### Deploy an operator without OLM
+### Automatically convert OLM operators for deployment without OLM
+#### 1. Create a conversion spec
+An example of conversion spec is provided in [conversion-spec-example.yaml](conversion-spec-example.yaml):
+```yaml
+artifacts:
+  renderedCatalogsPath: rendered
+  extractedBundlesPath: bundles
+  outputPath: output
+operators:
+- catalog: registry.redhat.io/redhat/redhat-operator-index:v4.12
+  packages:
+  - name: cluster-logging
+    channel: stable
+  - name: ptp-operator
+    channel: stable
+    namespace: openshift-ptp    
+  - name: local-storage-operator
+    channel: stable
+  - name: sriov-network-operator
+    channel: stable
+- catalog: registry.redhat.io/redhat/certified-operator-index:v4.12
+  packages:
+  - name: sriov-fec
+    channel: stable
+    namespace: vran-acceleration-operators
+policies:
+- name: fec
+  namespace: cnfdf01-common
+  policyAnnotations:
+    ran.openshift.io/ztp-deploy-wave: '1'
+  includedPackages:
+  - sriov-fec
+- name: operators
+  namespace: cnfdf01-common
+  policyAnnotations:
+    ran.openshift.io/ztp-deploy-wave: '1'
+  includedPackages:
+  - ptp-operator
+  - local-storage-operator
+  - cluster-logging
+  - sriov-network-operator
+placement:
+  clusterSelector:
+    matchExpressions:
+      - key: common-cnfdf01
+        operator: In
+        values:
+          - 'true'
+
+```
+The config file contains four sections: `artifacts`, `operators`, `policies` and `placement`. The last two are optional and only used for wrapping the generated manifests in policies.
+##### Artifacts section
+The `artifacts` section contains three directories that will be used for extracting and converting operator images to manifests:
+- `renderedCatalogsPath` - path where rendered operator catalogs will be stored. If not exists, the directory specified here will be created. After the catalogs are rendered to files, they won't be deleted. To download and render new catalogs, user should delete this directory or any of the rendered catalogs it might contain manually
+- `extractedBundlesPath` - path where bundle images will be extracted for conversion. This directory is re-initialized every time conversion runs
+- `outputPath` - path where the conversion result will be stored
+
+##### Operators section
+The `operators` section contains the catalog list. For each catalog we specify a list of packages to extract from. For each package we specify the channel and optionally the namespace to generate the manifests for.
+
+##### Policies section
+The `policies` section is filled if policy wrapping is required. It contains the list of policies, where we specify namespace, annotations and included packages for each.
+
+##### Placement section
+
+This section contains placement rules to be created for each of the policies generated.
+
+#### 2. Run operator conversion
+```bash
+$ go run main.go convert --spec-file conversion-spec-example.yaml
+```
+This will create the artifacts directories, render catalogs, download, convert and save bundles as manifests in the directory specified by `outputPath` in the `artifacts`section:
+```bash
+$ tree output -L 1
+output
+├── cluster-logging.v5.6.4
+├── local-storage-operator.v4.12.0-202304111715
+├── ptp-operator.4.12.0-202304111715
+├── sriov-fec.v2.6.1
+└── sriov-network-operator.v4.12.0-202304070941
+```
+Each of the above folders contains all the manifests related needed to deploy the bundle and kustomization file.
+
+#### 3. Run policy wrapping (optional)
+
+```bash
+$ go run main.go wrap --spec-file conversion-spec-example.yaml
+```
+
+This command will create policies and restructure the output directory accordingly:
+```bash
+$ tree output -L 3
+output
+└── policies
+    ├── fec
+    │   ├── kustomization.yaml
+    │   ├── policy-generator-config.yaml
+    │   ├── sriov-fec.v2.6.1
+    │   └── wrapped.yaml
+    └── operators
+        ├── cluster-logging.v5.6.4
+        ├── kustomization.yaml
+        ├── local-storage-operator.v4.12.0-202304111715
+        ├── policy-generator-config.yaml
+        ├── ptp-operator.4.12.0-202304111715
+        ├── sriov-network-operator.v4.12.0-202304070941
+        └── wrapped.yaml
+```
+
+### Manually convert an OLM operator for deployment without OLM
 This operation has three stages: index rendering, bundle pulling and schema conversion. The first two are combined in one script.
 #### 1. Download the catalog and extract the bundle
 Use [dl-bundle.sh](scripts/dl-bundle.sh) to download the operator catalog and extract the required bundle.
@@ -123,8 +232,5 @@ $ go run main.go convert --input /tmp/tmp.zkGHjiFvTP --override-namespace opensh
 
 
 ## Plans
-1. research how to handle ApiServiceDefinitions and WebhookDefinition - cancelled
 1. use makefile
-1. use config file so user won't need to copy temporary file names form one command to another
-1. do pulling and rendering in go, so it can be reused in TALM
 
