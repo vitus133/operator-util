@@ -1,0 +1,17 @@
+resources:
+    - namespace-openshift-logging.yaml
+    - serviceaccount-cluster-logging-operator.yaml
+    - role-cluster-logging.v5.6.4-cluster-logging-operator-5845c7699f.yaml
+    - rolebinding-cluster-logging.v5.6.4-cluster-logging-operator-5845c7699f.yaml
+    - clusterrole-cluster-logging.v5.6.4-cluster-logging-operator-78f6785b45.yaml
+    - clusterrolebinding-cluster-logging.v5.6.4-cluster-logging-operator-78f6785b45.yaml
+    - customresourcedefinition-clusterlogforwarders.logging.openshift.io.yaml
+    - customresourcedefinition-clusterloggings.logging.openshift.io.yaml
+    - servicemonitor-cluster-logging-operator-metrics-monitor.yaml
+    - service-cluster-logging-operator-metrics.yaml
+    - rolebinding-log-collector-privileged-binding.yaml
+    - role-log-collector-privileged.yaml
+    - clusterrole-metadata-reader.yaml
+    - role-prometheus.yaml
+    - rolebinding-prometheus.yaml
+    - deployment-cluster-logging-operator.yaml

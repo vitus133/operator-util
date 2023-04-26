@@ -1,0 +1,20 @@
+resources:
+    - namespace-openshift-sriov-network-operator.yaml
+    - serviceaccount-sriov-network-operator.yaml
+    - serviceaccount-sriov-network-config-daemon.yaml
+    - role-sriov-network-operator.v4.12.0-202304070941-sriov-ne-56565fcf78.yaml
+    - role-sriov-network-operator.v4.12.0-202304070941-sriov-ne-7f4c8c89c4.yaml
+    - rolebinding-sriov-network-operator.v4.12.0-202304070941-sriov-ne-56565fcf78.yaml
+    - rolebinding-sriov-network-operator.v4.12.0-202304070941-sriov-ne-7f4c8c89c4.yaml
+    - clusterrole-sriov-network-operator.v4.12.0-202304070941-sriov-ne-85bc6d65cf.yaml
+    - clusterrole-sriov-network-operator.v4.12.0-202304070941-sriov-ne-677f866777.yaml
+    - clusterrolebinding-sriov-network-operator.v4.12.0-202304070941-sriov-ne-85bc6d65cf.yaml
+    - clusterrolebinding-sriov-network-operator.v4.12.0-202304070941-sriov-ne-677f866777.yaml
+    - customresourcedefinition-sriovibnetworks.sriovnetwork.openshift.io.yaml
+    - customresourcedefinition-sriovnetworknodepolicies.sriovnetwork.openshift.io.yaml
+    - customresourcedefinition-sriovnetworknodestates.sriovnetwork.openshift.io.yaml
+    - customresourcedefinition-sriovnetworkpoolconfigs.sriovnetwork.openshift.io.yaml
+    - customresourcedefinition-sriovnetworks.sriovnetwork.openshift.io.yaml
+    - customresourcedefinition-sriovoperatorconfigs.sriovnetwork.openshift.io.yaml
+    - configmap-supported-nic-ids.yaml
+    - deployment-sriov-network-operator.yaml

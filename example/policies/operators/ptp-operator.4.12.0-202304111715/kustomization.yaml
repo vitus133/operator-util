@@ -1,0 +1,14 @@
+resources:
+    - daemonset-linuxptp-daemon.yaml
+    - servicemonitor-monitor-ptp.yaml
+    - service-ptp-monitor-service.yaml
+    - role-prometheus-k8s.yaml
+    - rolebinding-prometheus-k8s.yaml
+    - prometheusrule-ptp-rules.yaml
+    - configmap-ptp-configmap.yaml
+    - namespace-openshift-ptp.yaml
+    - serviceaccount-linuxptp-daemon.yaml
+    - role-ptp-operator.4.12.0-202304111715-linuxptp-daemon-7cb7d9685.yaml
+    - rolebinding-ptp-operator.4.12.0-202304111715-linuxptp-daemon-7cb7d9685.yaml
+    - clusterrole-ptp-operator.4.12.0-202304111715-linuxptp-daemon-b886dc98c.yaml
+    - clusterrolebinding-ptp-operator.4.12.0-202304111715-linuxptp-daemon-b886dc98c.yaml

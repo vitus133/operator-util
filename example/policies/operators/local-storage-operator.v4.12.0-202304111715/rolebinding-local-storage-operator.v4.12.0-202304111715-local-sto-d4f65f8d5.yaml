@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+    creationTimestamp: null
+    name: local-storage-operator.v4.12.0-202304111715-local-sto-d4f65f8d5
+    namespace: openshift-local-storage
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: local-storage-operator.v4.12.0-202304111715-local-sto-d4f65f8d5
+subjects:
+    - kind: ServiceAccount
+      name: local-storage-operator
+      namespace: openshift-local-storage

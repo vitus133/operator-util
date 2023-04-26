@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+    creationTimestamp: null
+    name: sriov-network-operator.v4.12.0-202304070941-sriov-ne-677f866777
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: sriov-network-operator.v4.12.0-202304070941-sriov-ne-677f866777
+subjects:
+    - kind: ServiceAccount
+      name: sriov-network-operator
+      namespace: openshift-sriov-network-operator

@@ -1,0 +1,48 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    creationTimestamp: null
+    name: sriov-network-operator.v4.12.0-202304070941-sriov-ne-85bc6d65cf
+rules:
+    - apiGroups:
+        - ""
+      resources:
+        - nodes
+      verbs:
+        - get
+        - list
+        - watch
+        - patch
+        - update
+    - apiGroups:
+        - ""
+      resources:
+        - pods
+      verbs:
+        - '*'
+    - apiGroups:
+        - apps
+      resources:
+        - daemonsets
+      verbs:
+        - get
+    - apiGroups:
+        - ""
+      resources:
+        - pods/eviction
+      verbs:
+        - create
+    - apiGroups:
+        - machineconfiguration.openshift.io
+      resources:
+        - '*'
+      verbs:
+        - '*'
+    - apiGroups:
+        - config.openshift.io
+      resources:
+        - infrastructures
+      verbs:
+        - get
+        - list
+        - watch

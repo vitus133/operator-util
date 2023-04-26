@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+    creationTimestamp: null
+    name: local-storage-operator.v4.12.0-202304111715-local-st-54f5f54866
+    namespace: openshift-local-storage
+rules:
+    - apiGroups:
+        - local.storage.openshift.io
+      resources:
+        - '*'
+      verbs:
+        - get
+        - list
+        - watch
+        - create
+        - update

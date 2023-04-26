@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+    creationTimestamp: null
+    name: ptp-operator.4.12.0-202304111715-linuxptp-daemon-7cb7d9685
+    namespace: openshift-ptp
+rules:
+    - apiGroups:
+        - security.openshift.io
+      resourceNames:
+        - privileged
+      resources:
+        - securitycontextconstraints
+      verbs:
+        - use

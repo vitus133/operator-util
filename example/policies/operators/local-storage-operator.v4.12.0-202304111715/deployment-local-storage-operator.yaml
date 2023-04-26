@@ -1,0 +1,150 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    annotations:
+        alm-examples: |-
+            [
+              {
+                "apiVersion": "local.storage.openshift.io/v1",
+                "kind": "LocalVolume",
+                "metadata": {
+                  "name": "example"
+                },
+                "spec": {
+                  "storageClassDevices": [
+                    {
+                      "devicePaths": [
+                        "/dev/disk/by-id/ata-crucial"
+                      ],
+                      "fsType": "ext4",
+                      "storageClassName": "foobar",
+                      "volumeMode": "Filesystem"
+                    }
+                  ]
+                }
+              },
+              {
+                "apiVersion": "local.storage.openshift.io/v1alpha1",
+                "kind": "LocalVolumeSet",
+                "metadata": {
+                  "name": "example-localvolumeset"
+                },
+                "spec": {
+                  "deviceInclusionSpec": {
+                    "deviceMechanicalProperties": [
+                      "Rotational",
+                      "NonRotational"
+                    ],
+                    "deviceTypes": [
+                      "RawDisk"
+                    ],
+                    "maxSize": "100G",
+                    "minSize": "10G"
+                  },
+                  "maxDeviceCount": 10,
+                  "nodeSelector": {
+                    "nodeSelectorTerms": [
+                      {
+                        "matchExpressions": [
+                          {
+                            "key": "kubernetes.io/hostname",
+                            "operator": "In",
+                            "values": [
+                              "worker-0",
+                              "worker-1"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "storageClassName": "example-storageclass",
+                  "volumeMode": "Block"
+                }
+              },
+              {
+                "apiVersion": "local.storage.openshift.io/v1alpha1",
+                "kind": "LocalVolumeDiscovery",
+                "metadata": {
+                  "name": "auto-discover-devices"
+                },
+                "spec": {
+                  "nodeSelector": {
+                    "nodeSelectorTerms": [
+                      {
+                        "matchExpressions": [
+                          {
+                            "key": "kubernetes.io/hostname",
+                            "operator": "In",
+                            "values": [
+                              "worker-0",
+                              "worker-1"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+        capabilities: Full Lifecycle
+        categories: Storage
+        containerImage: registry.redhat.io/openshift4/ose-local-storage-operator@sha256:c998c7d24b40519e17ba33ae25f7b7dafdac5868695714e913e57fca4af440d6
+        createdAt: "2019-08-14T00:00:00Z"
+        description: Configure and use local storage volumes.
+        olm.skipRange: '>=4.3.0 <4.12.0-202304111715'
+        olm.targetNamespaces: openshift-local-storage
+        operatorframework.io/cluster-monitoring: "true"
+        operatorframework.io/suggested-namespace: openshift-local-storage
+        operators.openshift.io/infrastructure-features: '["disconnected"]'
+        operators.openshift.io/valid-subscription: '["OpenShift Kubernetes Engine", "OpenShift Container Platform", "OpenShift Platform Plus"]'
+        operators.operatorframework.io/internal-objects: '["localvolumediscoveryresults.local.storage.openshift.io"]'
+        repository: https://github.com/openshift/local-storage-operator
+        support: Red Hat
+        target.workload.openshift.io/management: '{"effect": "PreferredDuringScheduling"}'
+    creationTimestamp: null
+    name: local-storage-operator
+    namespace: openshift-local-storage
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            name: local-storage-operator
+    strategy: {}
+    template:
+        metadata:
+            annotations:
+                target.workload.openshift.io/management: '{"effect": "PreferredDuringScheduling"}'
+            creationTimestamp: null
+            labels:
+                name: local-storage-operator
+        spec:
+            containers:
+                - args:
+                    - --leader-elect
+                  command:
+                    - local-storage-operator
+                  env:
+                    - name: WATCH_NAMESPACE
+                      valueFrom:
+                        fieldRef:
+                            fieldPath: metadata.namespace
+                    - name: DISKMAKER_IMAGE
+                      value: registry.redhat.io/openshift4/ose-local-storage-diskmaker@sha256:128ac9fd36d7a7da2cbd1b4f6dbdafa86f12de5af25ea531533d2ca7f126abf7
+                    - name: KUBE_RBAC_PROXY_IMAGE
+                      value: registry.redhat.io/openshift4/ose-kube-rbac-proxy@sha256:422e4fbe1ed81c79084f43a826dc0674510a7ff578e62b4ddda119ed3266d0b6
+                    - name: PRIORITY_CLASS_NAME
+                      value: openshift-user-critical
+                  image: registry.redhat.io/openshift4/ose-local-storage-operator@sha256:c998c7d24b40519e17ba33ae25f7b7dafdac5868695714e913e57fca4af440d6
+                  imagePullPolicy: IfNotPresent
+                  name: local-storage-operator
+                  ports:
+                    - containerPort: 60000
+                      name: metrics
+                  resources:
+                    requests:
+                        cpu: 10m
+                        memory: 50Mi
+            priorityClassName: openshift-user-critical
+            serviceAccountName: local-storage-operator

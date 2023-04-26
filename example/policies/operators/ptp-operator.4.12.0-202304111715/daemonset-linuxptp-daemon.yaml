@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+    annotations:
+        release.openshift.io/version: "4.12"
+    name: linuxptp-daemon
+    namespace: openshift-ptp
+spec:
+    selector:
+        matchLabels:
+            app: linuxptp-daemon
+    template:
+        metadata:
+            annotations:
+                target.workload.openshift.io/management: '{"effect": "PreferredDuringScheduling"}'
+            labels:
+                app: linuxptp-daemon
+        spec:
+            containers:
+                - args:
+                    - --logtostderr
+                    - --secure-listen-address=:8443
+                    - --tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+                    - --upstream=http://127.0.0.1:9091/
+                    - --tls-private-key-file=/etc/metrics/tls.key
+                    - --tls-cert-file=/etc/metrics/tls.crt
+                  image: registry.redhat.io/openshift4/ose-kube-rbac-proxy@sha256:422e4fbe1ed81c79084f43a826dc0674510a7ff578e62b4ddda119ed3266d0b6
+                  imagePullPolicy: IfNotPresent
+                  name: kube-rbac-proxy
+                  ports:
+                    - containerPort: 8443
+                      name: https
+                  resources:
+                    requests:
+                        cpu: 10m
+                        memory: 20Mi
+                  terminationMessagePolicy: FallbackToLogsOnError
+                  volumeMounts:
+                    - mountPath: /etc/metrics
+                      name: linuxptp-certs
+                      readOnly: true
+                - args:
+                    - /usr/local/bin/ptp --alsologtostderr -v 10
+                  command:
+                    - /bin/bash
+                    - -c
+                    - --
+                  env:
+                    - name: NODE_NAME
+                      valueFrom:
+                        fieldRef:
+                            fieldPath: spec.nodeName
+                    - name: LOGS_TO_SOCKET
+                      value: "false"
+                  image: registry.redhat.io/openshift4/ose-ptp@sha256:b9e363df448f0c15e6f15f25b5afea915501e5b663c20e5401e17ba3d09c05b3
+                  imagePullPolicy: IfNotPresent
+                  name: linuxptp-daemon-container
+                  resources:
+                    requests:
+                        cpu: 20m
+                        memory: 50Mi
+                  securityContext:
+                    privileged: true
+                  volumeMounts:
+                    - mountPath: /etc/linuxptp
+                      name: config-volume
+                    - mountPath: /var/run
+                      name: socket-dir
+            dnsPolicy: ClusterFirstWithHostNet
+            hostNetwork: true
+            hostPID: true
+            nodeSelector:
+                kubernetes.io/os: linux
+            priorityClassName: system-node-critical
+            serviceAccountName: linuxptp-daemon
+            tolerations:
+                - operator: Exists
+            volumes:
+                - configMap:
+                    name: ptp-configmap
+                  name: config-volume
+                - name: linuxptp-certs
+                  secret:
+                    secretName: linuxptp-daemon-secret
+                - hostPath:
+                    path: /var/run/ptp
+                    type: DirectoryOrCreate
+                  name: socket-dir
+    updateStrategy:
+        rollingUpdate:
+            maxUnavailable: 33%
+        type: RollingUpdate

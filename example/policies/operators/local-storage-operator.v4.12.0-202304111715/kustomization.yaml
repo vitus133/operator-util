@@ -1,0 +1,19 @@
+resources:
+    - namespace-openshift-local-storage.yaml
+    - serviceaccount-local-storage-admin.yaml
+    - serviceaccount-local-storage-operator.yaml
+    - role-local-storage-operator.v4.12.0-202304111715-local-sto-d4f65f8d5.yaml
+    - role-local-storage-operator.v4.12.0-202304111715-local-st-54f5f54866.yaml
+    - rolebinding-local-storage-operator.v4.12.0-202304111715-local-sto-d4f65f8d5.yaml
+    - rolebinding-local-storage-operator.v4.12.0-202304111715-local-st-54f5f54866.yaml
+    - clusterrole-local-storage-operator.v4.12.0-202304111715-local-sto-fd8bf8988.yaml
+    - clusterrole-local-storage-operator.v4.12.0-202304111715-local-st-66d67fc585.yaml
+    - clusterrolebinding-local-storage-operator.v4.12.0-202304111715-local-sto-fd8bf8988.yaml
+    - clusterrolebinding-local-storage-operator.v4.12.0-202304111715-local-st-66d67fc585.yaml
+    - customresourcedefinition-localvolumediscoveries.local.storage.openshift.io.yaml
+    - customresourcedefinition-localvolumediscoveryresults.local.storage.openshift.io.yaml
+    - customresourcedefinition-localvolumesets.local.storage.openshift.io.yaml
+    - customresourcedefinition-localvolumes.local.storage.openshift.io.yaml
+    - rolebinding-local-storage-metrics.yaml
+    - role-local-storage-metrics.yaml
+    - deployment-local-storage-operator.yaml

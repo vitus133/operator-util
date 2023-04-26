@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+    creationTimestamp: null
+    name: ptp-operator.4.12.0-202304111715-linuxptp-daemon-b886dc98c
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: ptp-operator.4.12.0-202304111715-linuxptp-daemon-b886dc98c
+subjects:
+    - kind: ServiceAccount
+      name: linuxptp-daemon
+      namespace: openshift-ptp
